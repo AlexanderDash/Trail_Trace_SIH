@@ -3,7 +3,8 @@ import {
   getIntelligenceSummary, 
   getNetworkGraph, 
   getCrossComplaintCorrelations, 
-  getTransactionAnalytics 
+  getTransactionAnalytics,
+  globalSearch
 } from "./service.js";
 
 export const intelligenceRouter = Router();
@@ -40,6 +41,18 @@ intelligenceRouter.get("/analytics/transactions", async (_req, res) => {
   try {
     const analytics = await getTransactionAnalytics();
     res.json(analytics);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+intelligenceRouter.get("/search", async (req, res) => {
+  try {
+    const q = req.query.q as string;
+    if (!q || q.length < 2) return res.json({ results: [] });
+    // Search implementation will go to service
+    const results = await globalSearch(q);
+    res.json({ results });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

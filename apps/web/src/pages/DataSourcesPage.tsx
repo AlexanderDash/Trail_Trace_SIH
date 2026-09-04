@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Upload, FileText, CheckCircle, XCircle, Settings, Play } from "lucide-react";
 import type { BankRecord } from "@trailtrace/shared";
-import { api } from "../lib/api";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";
@@ -20,12 +19,10 @@ interface DataUpload {
 }
 
 export function DataSourcesPage() {
-  const [banks, setBanks] = useState<BankRecord[]>([]);
   const [sources, setSources] = useState<DataUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [activeFile, setActiveFile] = useState<File | null>(null);
-  const [activeBankId, setActiveBankId] = useState<string>("");
 
   const [wizardState, setWizardState] = useState<{
     uploadId: string | null;
@@ -44,23 +41,12 @@ export function DataSourcesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchBanks();
     fetchSources();
   }, []);
 
-  const fetchBanks = async () => {
-    try {
-      const res = await api.banks();
-      setBanks(res.items);
-      if (res.items.length > 0) setActiveBankId(res.items[0].id);
-    } catch (e: any) {
-      setError(e.message);
-    }
-  };
-
   const fetchSources = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/v1/ingestion/sources");
+      const res = await fetch("/api/v1/ingestion/sources");
       const data = await res.json();
       setSources(data);
     } catch (e: any) {
@@ -75,13 +61,13 @@ export function DataSourcesPage() {
   };
 
   const handleUpload = async () => {
-    if (!activeFile || !activeBankId) return;
+    if (!activeFile) return;
+    setError(null);
     try {
       const formData = new FormData();
       formData.append("file", activeFile);
-      formData.append("bankId", activeBankId);
       
-      const res = await fetch("http://localhost:3001/api/v1/ingestion/upload", {
+      const res = await fetch("/api/v1/ingestion/upload", {
         method: "POST",
         body: formData
       });
@@ -103,7 +89,7 @@ export function DataSourcesPage() {
 
   const handleValidate = async (uploadId: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/ingestion/validate/${uploadId}`, {
+      const res = await fetch(`/api/v1/ingestion/validate/${uploadId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mapping: wizardState.mapping })
@@ -120,7 +106,7 @@ export function DataSourcesPage() {
 
   const handleImport = async (uploadId: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/ingestion/import/${uploadId}`, {
+      const res = await fetch(`/api/v1/ingestion/import/${uploadId}`, {
         method: "POST"
       });
       const data = await res.json();
@@ -135,7 +121,7 @@ export function DataSourcesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Remove this dataset?")) return;
-    await fetch(`http://localhost:3001/api/v1/ingestion/sources/${id}`, { method: "DELETE" });
+    await fetch(`/api/v1/ingestion/sources/${id}`, { method: "DELETE" });
     fetchSources();
   };
 
@@ -159,7 +145,14 @@ export function DataSourcesPage() {
         title="Data Sources"
         description="Upload and normalize multi-bank transaction data for analysis."
       />
-      {error && <Panel className="border-signal-rose"><p className="text-signal-rose text-sm">{error}</p></Panel>}
+      {error && (
+        <Panel className="border-signal-rose">
+          <div className="flex items-center justify-between">
+            <p className="text-signal-rose text-sm">{error}</p>
+            <button onClick={() => setError(null)} className="text-xs text-ink-500 hover:text-ink-700">Dismiss</button>
+          </div>
+        </Panel>
+      )}
 
       {/* Upload Wizard */}
       <Panel>
@@ -186,22 +179,11 @@ export function DataSourcesPage() {
               {activeFile.name} ({(activeFile.size / 1024).toFixed(1)} KB)
             </span>
           )}
-          
-          <div className="ml-auto flex items-center gap-2">
-            <label className="text-sm text-ink-500">Bank:</label>
-            <select 
-              value={activeBankId} 
-              onChange={e => setActiveBankId(e.target.value)}
-              className="px-3 py-1.5 bg-ink-100 dark:bg-ink-800/50 border border-ink-200 dark:border-ink-700 rounded text-sm text-ink-900 dark:text-ink-100"
-            >
-              {banks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-          </div>
 
           <button 
             onClick={handleUpload}
             disabled={!activeFile}
-            className="px-4 py-2 bg-intel hover:bg-intel/90 text-white rounded font-medium text-sm transition-colors disabled:opacity-50"
+            className="ml-auto px-4 py-2 bg-intel hover:bg-intel/90 text-white rounded font-medium text-sm transition-colors disabled:opacity-50"
           >
             Upload
           </button>

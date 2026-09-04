@@ -53,10 +53,44 @@ ingestionRouter.delete("/sources/:id", async (req, res) => {
 ingestionRouter.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
-    const { bankId } = req.body;
+    let { bankId } = req.body;
     
-    if (!file || !bankId) {
-      return res.status(400).json({ error: "Missing file or bankId" });
+    if (!file) {
+      return res.status(400).json({ error: "Missing file" });
+    }
+
+    if (!bankId) {
+      const fileNameUpper = file.originalname.toUpperCase();
+      let code = "";
+      let bankName = "";
+
+      if (fileNameUpper.includes("SBI")) {
+        code = "SBI"; bankName = "State Bank of India";
+      } else if (fileNameUpper.includes("BOB") || fileNameUpper.includes("BARODA")) {
+        code = "BOB"; bankName = "Bank of Baroda";
+      } else if (fileNameUpper.includes("ICICI")) {
+        code = "ICICI"; bankName = "ICICI Bank";
+      } else if (fileNameUpper.includes("HDFC")) {
+        code = "HDFC"; bankName = "HDFC Bank";
+      } else if (fileNameUpper.includes("AXIS")) {
+        code = "AXIS"; bankName = "Axis Bank";
+      } else if (fileNameUpper.includes("PNB")) {
+        code = "PNB"; bankName = "Punjab National Bank";
+      } else {
+        const baseName = path.parse(file.originalname).name.replace(/[^A-Za-z0-9_-]/g, "");
+        code = (baseName.slice(0, 8) || "BANK").toUpperCase();
+        bankName = baseName || "Bank";
+      }
+
+      let bank = await prisma.bank.findFirst({
+        where: { OR: [{ code }, { name: bankName }] }
+      });
+      if (!bank) {
+        bank = await prisma.bank.create({
+          data: { code, name: bankName }
+        });
+      }
+      bankId = bank.id;
     }
 
     const parsedData = await parseFile(file.path, file.mimetype || file.originalname);

@@ -9,35 +9,42 @@ accountsRouter.get("/", async (req, res) => {
   try {
     const { search, bankCode, riskLevel, watchlistStatus } = req.query;
 
-    const where: any = {};
-    
+    const conditions: any[] = [
+      {
+        OR: [
+          { sentTransactions: { some: { uploadId: { not: null } } } },
+          { receivedTransactions: { some: { uploadId: { not: null } } } },
+        ],
+      },
+    ];
+
     if (search) {
-      where.accountRef = { contains: search as string };
+      conditions.push({ accountRef: { contains: search as string } });
     }
-    
+
     if (bankCode) {
-      where.bank = { code: bankCode as string };
+      conditions.push({ bank: { code: bankCode as string } });
     }
-    
+
     if (riskLevel) {
-      where.riskStatus = (riskLevel as string).toLowerCase();
+      conditions.push({ riskStatus: (riskLevel as string).toLowerCase() });
     }
 
     if (watchlistStatus) {
-      where.watchlistStatus = (watchlistStatus as string).toLowerCase();
+      conditions.push({ watchlistStatus: (watchlistStatus as string).toLowerCase() });
     }
 
     const accounts = await prisma.account.findMany({
-      where,
+      where: { AND: conditions },
       include: {
         bank: true,
         riskProfile: true,
         _count: {
-          select: { trailNodes: true } // simple proxy for complaint trails count
-        }
+          select: { trailNodes: true },
+        },
       },
       orderBy: { riskScore: "desc" },
-      take: 100
+      take: 100,
     });
 
     res.json(accounts);

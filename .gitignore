@@ -13,8 +13,14 @@ Thumbs.db
 *.db-journal
 apps/api/prisma/dev.db
 apps/api/prisma/dev.db-journal
+apps/api/test.db
+apps/api/test.db-journal
 
 # IDE
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+# Uploads
+uploads/
+apps/api/uploads/

@@ -1,6 +1,8 @@
 import * as fs from 'fs';
-import * as xlsx from 'xlsx';
+import * as xlsxModule from 'xlsx';
 import Papa from 'papaparse';
+
+const xlsx = (xlsxModule as any).default ?? xlsxModule;
 
 export async function parseFile(filePath: string, fileType: string): Promise<any[]> {
   if (fileType.includes('csv') || filePath.endsWith('.csv')) {

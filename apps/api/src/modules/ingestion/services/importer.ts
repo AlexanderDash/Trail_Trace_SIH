@@ -25,9 +25,10 @@ export async function importTransactions(
   for (const accountRef of accountArray) {
     await prisma.account.upsert({
       where: { accountRef },
-      update: {},
+      update: { bankId },
       create: {
         accountRef,
+        bankId,
         riskScore: 0,
         riskStatus: "unscored",
         watchlistStatus: "none"

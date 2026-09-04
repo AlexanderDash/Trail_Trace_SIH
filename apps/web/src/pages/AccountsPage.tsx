@@ -305,7 +305,11 @@ export function AccountsPage() {
         </form>
 
         {loading ? (
-          <p className="text-sm text-ink-500">Loading...</p>
+          <p className="text-sm text-ink-500">Loading accounts...</p>
+        ) : accounts.length === 0 ? (
+          <div className="py-8 text-center text-sm text-ink-500 italic">
+            No accounts found in uploaded bank datasets. Please upload and import transaction files in Data Sources.
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

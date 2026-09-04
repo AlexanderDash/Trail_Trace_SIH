@@ -101,3 +101,49 @@ export async function getTransactionAnalytics() {
     // Would expand to temporal, amounts
   };
 }
+
+export async function globalSearch(q: string) {
+  const results: any[] = [];
+  
+  // 1. Account Search
+  const accounts = await prisma.account.findMany({
+    where: { accountRef: { contains: q } },
+    take: 5
+  });
+  accounts.forEach(a => results.push({ type: "ACCOUNT", id: a.id, title: a.accountRef, link: `/accounts/${a.accountRef}` }));
+
+  // 2. Complaint Search
+  const complaints = await prisma.complaint.findMany({
+    where: { complaintRef: { contains: q } },
+    take: 5
+  });
+  complaints.forEach(c => results.push({ type: "COMPLAINT", id: c.id, title: c.complaintRef, link: `/investigations` }));
+
+  // 3. Transaction Search
+  const txns = await prisma.transaction.findMany({
+    where: { sourceTransactionId: { contains: q } },
+    take: 5
+  });
+  txns.forEach(t => results.push({ type: "TRANSACTION", id: t.id, title: t.sourceTransactionId, link: `/transactions` }));
+
+  // 4. Investigation Search
+  const invs = await prisma.investigation.findMany({
+    where: { caseNumber: { contains: q } },
+    take: 5
+  });
+  invs.forEach(i => results.push({ type: "INVESTIGATION", id: i.id, title: i.caseNumber, link: `/investigations/${i.id}` }));
+
+  // 5. Bank Search
+  const banks = await prisma.bank.findMany({
+    where: { 
+      OR: [
+        { code: { contains: q } },
+        { name: { contains: q } }
+      ]
+    },
+    take: 3
+  });
+  banks.forEach(b => results.push({ type: "BANK", id: b.id, title: `${b.name} (${b.code})`, link: `/data-sources` }));
+
+  return results;
+}

@@ -59,18 +59,37 @@ export function ComplaintsPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [imports, setImports] = useState<any[]>([]);
+  const [showImports, setShowImports] = useState(false);
 
   useEffect(() => {
     fetchComplaints();
+    fetchImports();
   }, []);
 
   const fetchComplaints = async () => {
-    const res = await fetch(`${API}/complaints`);
-    const data = await res.json();
-    setComplaints(data);
+    try {
+      const res = await fetch(`${API}/complaints`);
+      if (!res.ok) throw new Error("Failed to load complaints");
+      const data = await res.json();
+      setComplaints(data);
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
+
+  const fetchImports = async () => {
+    try {
+      const res = await fetch(`${API}/complaints/imports`);
+      if (res.ok) {
+        const data = await res.json();
+        setImports(data);
+      }
+    } catch (e) {
+      // Non-blocking
+    }
   };
 
   const handleUpload = async () => {
@@ -85,12 +104,20 @@ export function ComplaintsPage() {
         body: formData,
       });
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (!res.ok || data.error) throw new Error(data.error || "Upload failed");
       
       // We start polling for new complaints to show up
-      setShowForm(false);
       setFile(null);
-      setTimeout(fetchComplaints, 1500); // Wait a bit for processing
+      setShowImports(true);
+      fetchImports();
+      // Poll a few times
+      let attempts = 0;
+      const interval = setInterval(() => {
+        fetchComplaints();
+        fetchImports();
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+      }, 2000);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -218,6 +245,32 @@ export function ComplaintsPage() {
               </button>
             </div>
           </div>
+        </Panel>
+      )}
+
+      {/* ── Import Status ─────────────────────────────────────────── */}
+      {showImports && imports.length > 0 && (
+        <Panel>
+          <h3 className="mb-4 text-sm font-semibold text-ink-900 dark:text-ink-100 flex items-center gap-2">
+            Recent Imports
+          </h3>
+          <div className="space-y-2">
+             {imports.map((imp) => (
+               <div key={imp.id} className="flex items-center justify-between p-3 border border-ink-200 dark:border-ink-800 rounded text-sm bg-ink-50 dark:bg-ink-900/30">
+                 <div>
+                   <div className="font-mono">{imp.fileName}</div>
+                   <div className="text-xs text-ink-500 mt-1">Processed: {new Date(imp.createdAt).toLocaleString()}</div>
+                 </div>
+                 <div className="text-right">
+                   <Badge tone={imp.status === "COMPLETED" ? "intel" : imp.status === "FAILED" ? "danger" : "warning"}>{imp.status}</Badge>
+                   {imp.status === "COMPLETED" && (
+                     <div className="text-xs text-ink-500 mt-1">Imported: {imp.importedCount} / {imp.rowCount}</div>
+                   )}
+                 </div>
+               </div>
+             ))}
+          </div>
+          <button onClick={() => setShowImports(false)} className="mt-4 text-xs text-ink-500 hover:text-ink-700">Hide</button>
         </Panel>
       )}
 
