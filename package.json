@@ -1,0 +1,26 @@
+{
+  "name": "trailtrace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TrailTrace — predictive analytics foundation for cybercrime financial intelligence (SIH 26184). Synthetic demo only.",
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @trailtrace/api\" \"npm run dev -w @trailtrace/web\"",
+    "build": "npm run build -w @trailtrace/api && npm run build -w @trailtrace/web",
+    "typecheck": "npm run typecheck -w @trailtrace/shared && npm run typecheck -w @trailtrace/api && npm run typecheck -w @trailtrace/web",
+    "db:generate": "npm run prisma:generate -w @trailtrace/api",
+    "db:migrate": "npm run prisma:migrate -w @trailtrace/api",
+    "db:seed": "npm run prisma:seed -w @trailtrace/api",
+    "db:reset": "npm run prisma:reset -w @trailtrace/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

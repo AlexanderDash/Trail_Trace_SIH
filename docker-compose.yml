@@ -1,0 +1,20 @@
+# Optional PostgreSQL for later stages.
+# Foundation currently uses SQLite so the app runs without Docker.
+# Docker is not required to start TrailTrace today.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trailtrace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trailtrace
+      POSTGRES_PASSWORD: trailtrace
+      POSTGRES_DB: trailtrace
+    ports:
+      - "5432:5432"
+    volumes:
+      - trailtrace_pg:/var/lib/postgresql/data
+
+volumes:
+  trailtrace_pg:

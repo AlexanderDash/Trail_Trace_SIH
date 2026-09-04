@@ -1,0 +1,321 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Foundation schema for SIH 26184.
+
+model Bank {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts     Account[]
+  transactions Transaction[]
+  uploads      DataUpload[]
+}
+
+model DataUpload {
+  id             String   @id @default(cuid())
+  bankId         String
+  bank           Bank     @relation(fields: [bankId], references: [id])
+  fileName       String
+  originalFormat String
+  status         String   @default("pending")
+  columnMapping  Json?
+  rowCount       Int      @default(0)
+  ingestedCount  Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+model Account {
+  id              String   @id @default(cuid())
+  accountRef      String   @unique
+  bankId          String?
+  bank            Bank?    @relation(fields: [bankId], references: [id])
+  accountType     String?
+  riskScore       Float    @default(0)
+  riskStatus      String   @default("unscored")
+  watchlistStatus String   @default("none")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sentTransactions     Transaction[]     @relation("SenderAccount")
+  receivedTransactions Transaction[]     @relation("ReceiverAccount")
+  complaintsAsVictim   Complaint[]
+  trailNodes           TrailNode[]
+  watchlist            WatchlistAccount?
+  alerts               Alert[]
+  locationEvents       LocationEvent[]
+  riskProfile          RiskProfile?
+  riskSignals          RiskSignal[]
+  riskHistory          RiskHistory[]
+}
+
+model ModelVersion {
+  id                  String   @id @default(cuid())
+  name                String
+  version             String
+  algorithm           String
+  trainedAt           DateTime @default(now())
+  trainingSampleCount Int
+  featureCount        Int
+  metricsJson         String
+  status              String
+  createdAt           DateTime @default(now())
+}
+
+model Transaction {
+  id                  String      @id @default(cuid())
+  sourceTransactionId String
+  bankId              String
+  bank                Bank        @relation(fields: [bankId], references: [id])
+  uploadId            String?
+  upload              DataUpload? @relation(fields: [uploadId], references: [id])
+  timestamp           DateTime
+  senderAccountId     String
+  senderAccount       Account     @relation("SenderAccount", fields: [senderAccountId], references: [id])
+  receiverAccountId   String
+  receiverAccount     Account     @relation("ReceiverAccount", fields: [receiverAccountId], references: [id])
+  transferType        String?
+  senderAccountType   String?
+  receiverAccountType String?
+  amount              Decimal
+  transactionMode     String?
+  locationCity        String?
+  merchantId          String?
+  merchant            Merchant?   @relation(fields: [merchantId], references: [id])
+  rawPayload          Json?
+  createdAt           DateTime    @default(now())
+
+  matchedComplaints Complaint[]
+  trailConnections  TrailConnection[]
+  locationEvents    LocationEvent[]
+  evidence          Evidence[]
+
+  @@unique([bankId, sourceTransactionId])
+}
+
+model Complaint {
+  id                   String         @id @default(cuid())
+  complaintRef         String         @unique
+  victimAccountId      String
+  victimAccount        Account        @relation(fields: [victimAccountId], references: [id])
+  amount               Decimal
+  timestamp            DateTime
+  transactionMode      String?
+  description          String?
+  matchedTransactionId String?
+  matchedTransaction   Transaction?   @relation(fields: [matchedTransactionId], references: [id])
+  investigationStatus  String         @default("new")
+  investigationId      String?
+  investigation        Investigation? @relation(fields: [investigationId], references: [id])
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  trails   Trail[]
+  evidence Evidence[]
+}
+
+model Investigation {
+  id          String    @id @default(cuid())
+  caseNumber  String    @unique
+  title       String
+  description String?
+  status      String    @default("OPEN")
+  priority    String    @default("MEDIUM")
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  closedAt    DateTime?
+
+  complaints Complaint[]
+  trails     Trail[]
+  evidence   Evidence[]
+  alerts     Alert[]
+
+  investigationNotes InvestigationNote[]
+  findings           InvestigationFinding[]
+  activities         InvestigationActivity[]
+}
+
+model InvestigationNote {
+  id              String        @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  content         String
+  author          String        @default("Investigator")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model InvestigationFinding {
+  id              String        @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  type            String
+  description     String
+  author          String        @default("Investigator")
+  createdAt       DateTime      @default(now())
+}
+
+model InvestigationActivity {
+  id              String        @id @default(cuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  type            String
+  description     String
+  metadata        Json?
+  actor           String        @default("System")
+  createdAt       DateTime      @default(now())
+}
+
+model Trail {
+  id                  String         @id @default(cuid())
+  complaintId         String
+  complaint           Complaint      @relation(fields: [complaintId], references: [id])
+  investigationId     String?
+  investigation       Investigation? @relation(fields: [investigationId], references: [id])
+  status              String         @default("draft")
+  originTransactionId String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  nodes       TrailNode[]
+  connections TrailConnection[]
+}
+
+model TrailNode {
+  id        String   @id @default(cuid())
+  trailId   String
+  trail     Trail    @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+  sequence  Int
+  role      String
+  createdAt DateTime @default(now())
+
+  outgoing TrailConnection[] @relation("FromNode")
+  incoming TrailConnection[] @relation("ToNode")
+}
+
+model TrailConnection {
+  id            String       @id @default(cuid())
+  trailId       String
+  trail         Trail        @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  fromNodeId    String
+  fromNode      TrailNode    @relation("FromNode", fields: [fromNodeId], references: [id])
+  toNodeId      String
+  toNode        TrailNode    @relation("ToNode", fields: [toNodeId], references: [id])
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime     @default(now())
+}
+
+model WatchlistAccount {
+  id        String   @id @default(cuid())
+  accountId String   @unique
+  account   Account  @relation(fields: [accountId], references: [id])
+  reason    String?
+  status    String   @default("active")
+  notes     String?
+  addedAt   DateTime @default(now())
+}
+
+model Alert {
+  id              String         @id @default(cuid())
+  accountId       String?
+  account         Account?       @relation(fields: [accountId], references: [id])
+  investigationId String?
+  investigation   Investigation? @relation(fields: [investigationId], references: [id])
+  type            String
+  severity        String
+  title           String
+  message         String
+  acknowledged    Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+}
+
+model Merchant {
+  id        String   @id @default(cuid())
+  name      String
+  category  String?
+  createdAt DateTime @default(now())
+
+  transactions   Transaction[]
+  locationEvents LocationEvent[]
+}
+
+model LocationEvent {
+  id            String       @id @default(cuid())
+  accountId     String?
+  account       Account?     @relation(fields: [accountId], references: [id])
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  merchantId    String?
+  merchant      Merchant?    @relation(fields: [merchantId], references: [id])
+  latitude      Float?
+  longitude     Float?
+  city          String?
+  category      String?
+  observedAt    DateTime?
+  createdAt     DateTime     @default(now())
+}
+
+model Evidence {
+  id              String         @id @default(cuid())
+  investigationId String?
+  investigation   Investigation? @relation(fields: [investigationId], references: [id])
+  complaintId     String?
+  complaint       Complaint?     @relation(fields: [complaintId], references: [id])
+  transactionId   String?
+  transaction     Transaction?   @relation(fields: [transactionId], references: [id])
+  type            String
+  summary         String
+  payload         Json?
+  createdAt       DateTime       @default(now())
+}
+
+model RiskProfile {
+  id        String   @id @default(cuid())
+  accountId String   @unique
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  score     Float    @default(0)
+  level     String   @default("LOW")
+  features  Json?
+  updatedAt DateTime @updatedAt
+}
+
+model RiskSignal {
+  id                  String   @id @default(cuid())
+  accountId           String
+  account             Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  signalType          String
+  severity            String
+  value               Float?
+  description         String
+  sourceTransactionId String?
+  sourceTrailId       String?
+  metadata            Json?
+  detectedAt          DateTime @default(now())
+}
+
+model RiskHistory {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  oldScore  Float?
+  newScore  Float
+  oldLevel  String?
+  newLevel  String
+  reason    String?
+  changedAt DateTime @default(now())
+}
