@@ -13,6 +13,7 @@ import { TrailsPage } from "./pages/TrailsPage";
 import { TransactionsPage } from "./pages/TransactionsPage";
 import { WatchlistPage } from "./pages/WatchlistPage";
 import { InvestigationWorkspacePage } from "./pages/InvestigationWorkspacePage";
+import { IntelligencePage } from "./pages/IntelligencePage";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="alerts" element={<AlertsPage />} />
         <Route path="investigations" element={<InvestigationsPage />} />
         <Route path="investigations/:id" element={<InvestigationWorkspacePage />} />
+        <Route path="intelligence" element={<IntelligencePage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="data-sources" element={<DataSourcesPage />} />
         <Route path="settings" element={<SettingsPage />} />

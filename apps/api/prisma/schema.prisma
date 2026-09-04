@@ -104,22 +104,37 @@ model Transaction {
   @@unique([bankId, sourceTransactionId])
 }
 
+model ComplaintUpload {
+  id            String   @id @default(cuid())
+  fileName      String
+  status        String   @default("pending")
+  rowCount      Int      @default(0)
+  importedCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  complaints Complaint[]
+}
+
 model Complaint {
-  id                   String         @id @default(cuid())
-  complaintRef         String         @unique
-  victimAccountId      String
-  victimAccount        Account        @relation(fields: [victimAccountId], references: [id])
-  amount               Decimal
-  timestamp            DateTime
-  transactionMode      String?
-  description          String?
-  matchedTransactionId String?
-  matchedTransaction   Transaction?   @relation(fields: [matchedTransactionId], references: [id])
-  investigationStatus  String         @default("new")
-  investigationId      String?
-  investigation        Investigation? @relation(fields: [investigationId], references: [id])
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  id                     String           @id @default(cuid())
+  complaintRef           String           @unique
+  uploadId               String?
+  upload                 ComplaintUpload? @relation(fields: [uploadId], references: [id])
+  victimAccountId        String
+  victimAccount          Account          @relation(fields: [victimAccountId], references: [id])
+  amount                 Decimal
+  timestamp              DateTime
+  transactionMode        String?
+  city                   String?
+  description            String?
+  suspectedTransactionId String?
+  matchedTransactionId   String?
+  matchedTransaction     Transaction?     @relation(fields: [matchedTransactionId], references: [id])
+  investigationStatus    String           @default("new")
+  investigationId        String?
+  investigation          Investigation?   @relation(fields: [investigationId], references: [id])
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   trails   Trail[]
   evidence Evidence[]

@@ -44,7 +44,6 @@ interface Candidate {
   reasons: string[];
 }
 
-const MODES = ["UPI", "IMPS", "NEFT", "RTGS", "ATM", "CARD", "OTHER"];
 
 const statusTone = (s: string): "neutral" | "intel" | "warning" | "danger" => {
   if (s === "MATCHED") return "intel";
@@ -61,15 +60,8 @@ export function ComplaintsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Form state
-  const [form, setForm] = useState({
-    complaintRef: "",
-    victimAccountRef: "",
-    amount: "",
-    timestamp: "",
-    transactionMode: "IMPS",
-    description: "",
-  });
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchComplaints();
@@ -81,21 +73,28 @@ export function ComplaintsPage() {
     setComplaints(data);
   };
 
-  const handleCreate = async () => {
+  const handleUpload = async () => {
+    if (!file) return;
     setError(null);
+    setUploading(true);
     try {
-      const res = await fetch(`${API}/complaints`, {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/complaints/upload`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: formData,
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      
+      // We start polling for new complaints to show up
       setShowForm(false);
-      setForm({ complaintRef: "", victimAccountRef: "", amount: "", timestamp: "", transactionMode: "IMPS", description: "" });
-      fetchComplaints();
+      setFile(null);
+      setTimeout(fetchComplaints, 1500); // Wait a bit for processing
     } catch (e: any) {
       setError(e.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -185,43 +184,39 @@ export function ComplaintsPage() {
         </Panel>
       )}
 
-      {/* ── Create Complaint Form ─────────────────────────────────── */}
+      {/* ── Import Complaints Form ─────────────────────────────────── */}
       {showForm && (
         <Panel>
           <h3 className="mb-4 text-lg font-semibold text-ink-900 dark:text-ink-100 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-intel" /> New Complaint
+            <FileText className="h-5 w-5 text-intel" /> Cybercrime Complaint Data
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <p className="text-sm text-ink-600 dark:text-ink-300 mb-4">
+            Upload complaint records supplied by the investigation authority. Supported fields: Complaint ID, Complaint Date, Victim Account, Complaint Description, Amount Lost, Transaction Mode, City, Suspected Transaction ID, Status.
+          </p>
+          <div className="flex flex-col gap-4 max-w-md">
             <div>
-              <label className="block text-xs font-medium text-ink-500 mb-1">Complaint ID</label>
-              <input className="w-full rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-900 dark:text-ink-100" placeholder="CMP_001" value={form.complaintRef} onChange={e => setForm({...form, complaintRef: e.target.value})} />
+              <input
+                type="file"
+                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-intel file:text-white hover:file:bg-intel/90"
+              />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-ink-500 mb-1">Victim Account</label>
-              <input className="w-full rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-900 dark:text-ink-100" placeholder="VIC_10" value={form.victimAccountRef} onChange={e => setForm({...form, victimAccountRef: e.target.value})} />
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={handleUpload}
+                disabled={!file || uploading}
+                className="rounded bg-intel px-4 py-2 text-sm font-medium text-white hover:bg-intel/90 disabled:opacity-50"
+              >
+                {uploading ? "Importing..." : "Import Complaints"}
+              </button>
+              <button
+                onClick={() => setShowForm(false)}
+                className="rounded border border-ink-300 dark:border-ink-700 px-4 py-2 text-sm text-ink-600 dark:text-ink-300 hover:bg-ink-100 dark:hover:bg-ink-800"
+              >
+                Cancel
+              </button>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-ink-500 mb-1">Amount (₹)</label>
-              <input className="w-full rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-900 dark:text-ink-100" placeholder="2,50,000" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-ink-500 mb-1">Transaction Date/Time</label>
-              <input className="w-full rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-900 dark:text-ink-100" placeholder="10:15:00" value={form.timestamp} onChange={e => setForm({...form, timestamp: e.target.value})} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-ink-500 mb-1">Transaction Mode</label>
-              <select className="w-full rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-900 dark:text-ink-100" value={form.transactionMode} onChange={e => setForm({...form, transactionMode: e.target.value})}>
-                {MODES.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div className="md:col-span-2 lg:col-span-3">
-              <label className="block text-xs font-medium text-ink-500 mb-1">Description</label>
-              <textarea className="w-full rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-900 dark:text-ink-100" rows={2} placeholder="Describe the complaint..." value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
-            </div>
-          </div>
-          <div className="mt-4 flex gap-3">
-            <button onClick={handleCreate} className="rounded bg-intel px-4 py-2 text-sm font-medium text-white hover:bg-intel/90">Submit Complaint</button>
-            <button onClick={() => setShowForm(false)} className="rounded border border-ink-300 dark:border-ink-700 px-4 py-2 text-sm text-ink-600 dark:text-ink-300 hover:bg-ink-100 dark:hover:bg-ink-800">Cancel</button>
           </div>
         </Panel>
       )}

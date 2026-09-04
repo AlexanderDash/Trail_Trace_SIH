@@ -21,19 +21,6 @@ html:not(.dark) body {
   @apply bg-ink-50 text-ink-900;
 }
 
-.grid-overlay {
-  background-image:
-    linear-gradient(rgba(62, 224, 197, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(62, 224, 197, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-html:not(.dark) .grid-overlay {
-  background-image:
-    linear-gradient(rgba(28, 43, 64, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28, 43, 64, 0.05) 1px, transparent 1px);
-}
-
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
 }

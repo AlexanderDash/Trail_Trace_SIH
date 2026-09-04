@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   Users,
   Wallet,
+  Network
 } from "lucide-react";
 
 export type NavItem = {
@@ -31,6 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: "/geospatial", label: "Map Intelligence", icon: Map, ready: true },
   { to: "/alerts", label: "Alerts", icon: Bell, ready: true },
   { to: "/investigations", label: "Investigations", icon: Briefcase, ready: true },
+  { to: "/intelligence", label: "Intelligence", icon: Network, ready: true },
   { to: "/reports", label: "Reports", icon: ScrollText },
   { to: "/data-sources", label: "Data Sources", icon: Database, ready: true },
   { to: "/settings", label: "Settings", icon: Settings, ready: true },

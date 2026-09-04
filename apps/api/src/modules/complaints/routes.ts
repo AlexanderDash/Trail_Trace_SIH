@@ -7,7 +7,55 @@ import {
   confirmMatch,
 } from "./service.js";
 
+import multer from "multer";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { prisma } from "../../lib/prisma.js";
+import { processComplaintUpload } from "./import.js";
+
+const upload = multer({ dest: "uploads/" });
+
 export const complaintsRouter = Router();
+
+// Upload complaints file
+complaintsRouter.post("/upload", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const uploadRecord = await prisma.complaintUpload.create({
+      data: {
+        fileName: req.file.originalname,
+        status: "PROCESSING",
+      },
+    });
+
+    // Fire and forget processing
+    processComplaintUpload(uploadRecord.id, req.file.path).catch(console.error);
+
+    res.status(202).json({
+      message: "Complaint import started",
+      uploadId: uploadRecord.id,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get uploads status
+complaintsRouter.get("/imports", async (_req, res) => {
+  try {
+    const imports = await prisma.complaintUpload.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20
+    });
+    res.json(imports);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // List all complaints
 complaintsRouter.get("/", async (_req, res) => {

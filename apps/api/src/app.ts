@@ -16,6 +16,7 @@ import { alertsRouter } from "./modules/alerts/routes.js";
 import { geospatialRouter } from "./modules/geospatial/routes.js";
 import { mlRouter } from "./modules/ml/routes.js";
 import { investigationsRouter } from "./modules/investigations/routes.js";
+import { intelligenceRouter } from "./modules/intelligence/routes.js";
 
 export function createApp() {
   const app = express();
@@ -45,6 +46,7 @@ export function createApp() {
   app.use("/api/v1/geospatial", geospatialRouter);
   app.use("/api/v1/ml", mlRouter);
   app.use("/api/v1/investigations", investigationsRouter);
+  app.use("/api/v1/intelligence", intelligenceRouter);
 
   app.use(
     "/api/v1/transactions",
