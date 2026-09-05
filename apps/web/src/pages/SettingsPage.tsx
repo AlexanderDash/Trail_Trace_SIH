@@ -62,6 +62,33 @@ export function SettingsPage() {
             <p className="mt-4 text-sm text-ink-500">System metadata unavailable until the API is running.</p>
           )}
         </Panel>
+        <Panel>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink-400">Data Management</h2>
+          <p className="mt-2 text-sm text-ink-500">
+            Reset the prototype database and memory. Removes all uploaded datasets, normalized transactions, complaints, trails, and generated investigations so you can run a completely fresh demonstration.
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              const confirmed = window.confirm(
+                "Are you sure you want to clear all memory?\n\nThis will remove all uploaded bank data, complaints, trails, accounts, and investigations to start fresh from the beginning."
+              );
+              if (!confirmed) return;
+              try {
+                const res = await fetch("/api/v1/system/clear-memory", { method: "POST" });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                alert("Memory cleared! Redirecting to Data Sources...");
+                window.location.href = "/data-sources";
+              } catch (e: any) {
+                alert(`Error: ${e.message}`);
+              }
+            }}
+            className="mt-4 rounded-lg border border-signal-rose/40 bg-signal-rose/10 px-4 py-2 text-sm font-medium text-signal-rose hover:bg-signal-rose/20 transition-colors"
+          >
+            Clear Memory (Wipe All Data)
+          </button>
+        </Panel>
       </div>
     </div>
   );

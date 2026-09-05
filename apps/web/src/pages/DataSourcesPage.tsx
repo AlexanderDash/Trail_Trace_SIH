@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Upload, FileText, CheckCircle, XCircle, Settings, Play } from "lucide-react";
+import { Upload, FileText, CheckCircle, XCircle, Settings, Play, RotateCcw } from "lucide-react";
 import type { BankRecord } from "@trailtrace/shared";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -125,6 +125,24 @@ export function DataSourcesPage() {
     fetchSources();
   };
 
+  const handleClearMemory = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear all memory?\n\nThis will remove all uploaded datasets, complaints, trails, accounts, and investigations so you can start 100% fresh."
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch("/api/v1/system/clear-memory", { method: "POST" });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      fetchSources();
+      setWizardState({ uploadId: null, columns: [], preview: [], mapping: {}, validation: null });
+      setActiveFile(null);
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
+
   const TARGET_FIELDS = [
     { value: "transactionId", label: "Transaction ID (Req)" },
     { value: "timestamp", label: "Transaction Time (Req)" },
@@ -144,6 +162,16 @@ export function DataSourcesPage() {
         eyebrow="Data Ingestion"
         title="Data Sources"
         description="Upload and normalize multi-bank transaction data for analysis."
+        actions={
+          <button
+            type="button"
+            onClick={handleClearMemory}
+            className="flex items-center gap-2 rounded-lg border border-signal-rose/40 bg-signal-rose/10 px-4 py-2 text-sm font-medium text-signal-rose hover:bg-signal-rose/20 transition-colors"
+          >
+            <RotateCcw className="h-4 w-4" />
+            <span>Clear Memory (Start Fresh)</span>
+          </button>
+        }
       />
       {error && (
         <Panel className="border-signal-rose">

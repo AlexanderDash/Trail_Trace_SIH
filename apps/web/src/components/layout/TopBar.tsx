@@ -1,4 +1,4 @@
-import { Moon, Sun, Search as SearchIcon } from "lucide-react";
+import { Moon, Sun, Search as SearchIcon, RotateCcw } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useState } from "react";
 
@@ -7,6 +7,7 @@ export function TopBar({ apiLabel }: { apiLabel: string }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value;
@@ -24,6 +25,24 @@ export function TopBar({ apiLabel }: { apiLabel: string }) {
       setResults([]);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleClearMemory = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear all memory?\n\nThis will remove all uploaded bank data, complaints, accounts, trails, and investigations so you can start 100% fresh from the beginning."
+    );
+    if (!confirmed) return;
+
+    setIsClearing(true);
+    try {
+      const res = await fetch("/api/v1/system/clear-memory", { method: "POST" });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      window.location.href = "/data-sources";
+    } catch (err: any) {
+      alert(`Failed to clear memory: ${err.message}`);
+      setIsClearing(false);
     }
   };
 
@@ -65,6 +84,17 @@ export function TopBar({ apiLabel }: { apiLabel: string }) {
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handleClearMemory}
+          disabled={isClearing}
+          className="flex items-center gap-1.5 rounded-lg border border-signal-rose/40 bg-signal-rose/10 px-3 py-1.5 text-xs font-medium text-signal-rose hover:bg-signal-rose/20 transition-colors disabled:opacity-50"
+          title="Wipe all uploaded bank data, complaints, trails, and accounts to start fresh"
+        >
+          <RotateCcw className={`h-3.5 w-3.5 ${isClearing ? "animate-spin" : ""}`} />
+          <span>{isClearing ? "Clearing..." : "Clear Memory"}</span>
+        </button>
+
         <span className="hidden rounded-full border border-ink-200 px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-500 dark:border-ink-700 dark:text-ink-300 sm:inline">
           Investigator view
         </span>
