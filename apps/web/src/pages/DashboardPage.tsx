@@ -59,7 +59,7 @@ export function DashboardPage() {
         <StatCard
           label="Uploaded banks"
           value={totals?.banks ?? "—"}
-          hint="Registered source banks. Ingestion of files is not live yet."
+          hint="Source banks with uploaded transaction datasets."
           icon={Building2}
         />
         <StatCard
@@ -90,7 +90,7 @@ export function DashboardPage() {
         <StatCard
           label="High risk accounts"
           value={totals?.highRiskAccounts ?? "—"}
-          hint="Accounts scored high or critical. Scoring engine not implemented."
+          hint="Accounts scored high or critical by behavioural risk engine."
           icon={TriangleAlert}
           tone="danger"
         />

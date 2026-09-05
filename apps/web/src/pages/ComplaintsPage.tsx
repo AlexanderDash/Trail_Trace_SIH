@@ -27,6 +27,7 @@ interface Complaint {
     sourceTransactionId: string;
     bank: { name: string; code: string };
   } | null;
+  trails?: { id: string }[];
   createdAt: string;
 }
 
@@ -320,8 +321,17 @@ export function ComplaintsPage() {
                       )}
                       {c.investigationStatus === "MATCHED" && (
                         <>
-                          <button onClick={() => handleStartTrail(c.id)} className="flex items-center gap-1 rounded bg-ink-200 dark:bg-ink-800 px-3 py-1 text-xs font-medium hover:bg-ink-300 dark:hover:bg-ink-700 text-ink-900 dark:text-ink-100">
-                            <GitBranch className="h-3 w-3" /> Trace Money
+                          <button 
+                            onClick={() => {
+                              if (c.trails && c.trails.length > 0) {
+                                window.location.href = `/trails?trailId=${c.trails[0].id}`;
+                              } else {
+                                handleStartTrail(c.id);
+                              }
+                            }} 
+                            className="flex items-center gap-1 rounded bg-ink-200 dark:bg-ink-800 px-3 py-1 text-xs font-medium hover:bg-ink-300 dark:hover:bg-ink-700 text-ink-900 dark:text-ink-100"
+                          >
+                            <GitBranch className="h-3 w-3" /> {c.trails && c.trails.length > 0 ? "View Trail" : "Trace Money"}
                           </button>
                           <button onClick={() => handleCreateInvestigation(c.id)} className="flex items-center gap-1 rounded bg-intel/10 text-intel px-3 py-1 text-xs font-medium hover:bg-intel/20">
                             <Plus className="h-3 w-3" /> Create Investigation

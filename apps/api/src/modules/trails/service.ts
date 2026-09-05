@@ -58,6 +58,14 @@ export async function createTrail(complaintId: string): Promise<TrailResult> {
 
   const originTxn = complaint.matchedTransaction;
 
+  // Remove any pre-existing trails for this complaint to prevent duplicates
+  const existingTrails = await prisma.trail.findMany({ where: { complaintId: complaint.id } });
+  for (const old of existingTrails) {
+    await prisma.trailConnection.deleteMany({ where: { trailId: old.id } });
+    await prisma.trailNode.deleteMany({ where: { trailId: old.id } });
+    await prisma.trail.delete({ where: { id: old.id } });
+  }
+
   // Create the Trail record
   const trail = await prisma.trail.create({
     data: {

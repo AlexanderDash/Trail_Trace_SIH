@@ -85,6 +85,9 @@ export async function listComplaints() {
       matchedTransaction: {
         include: { bank: true },
       },
+      trails: {
+        select: { id: true },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

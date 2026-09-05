@@ -17,7 +17,11 @@ export async function getDashboardSummary(databaseConnected: boolean): Promise<D
   ] = databaseConnected
     ? await Promise.all([
         prisma.transaction.count(),
-        prisma.bank.count(),
+        prisma.bank.count({
+          where: {
+            uploads: { some: {} },
+          },
+        }),
         prisma.complaint.count({
           where: { investigationStatus: { not: "closed" } },
         }),
