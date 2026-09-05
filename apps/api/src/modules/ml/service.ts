@@ -42,11 +42,34 @@ export async function trainModel() {
   // For now, it will always fail gracefully because the DB is small.
 }
 
+const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || "http://localhost:8000";
+
 export async function getActiveModel() {
-  return await prisma.modelVersion.findFirst({
-    where: { status: { in: ["ACTIVE", "INSUFFICIENT_DATA"] } },
-    orderBy: { createdAt: "desc" }
-  });
+  let isOnline = false;
+  try {
+    const res = await fetch(`${PYTHON_ENGINE_URL}/docs`, { method: "HEAD", signal: AbortSignal.timeout(1500) });
+    isOnline = res.ok || res.status === 200 || res.status === 404 || res.status === 405;
+  } catch {
+    isOnline = false;
+  }
+
+  return {
+    name: "NetworkX_Laplace_v1",
+    version: "1.0.0",
+    algorithm: "Laplace Add-1 Smoothing & NetworkX MultiDiGraph",
+    engine: "Python Mathematical Forecasting Engine",
+    status: isOnline ? "ACTIVE" : "STANDBY",
+    type: "Probabilistic Graph Traversal & Drift Risk Scoring",
+    description: "Multi-hop graph trajectory prediction with Laplace smoothing, novel mule route risk assessment, and dynamic district cash-out confidence.",
+    engineUrl: PYTHON_ENGINE_URL,
+    capabilities: [
+      "Laplace Add-1 Out-Edge Smoothing",
+      "Novel Route / Mule Account Drift Risk",
+      "Dynamic Geographic Location Confidence (Exponential Sample Scaling)",
+      "Golden Hour (60m) Rapid Digital Freeze Urgency Tiering",
+      "Natural Language Tactical Investigator Briefings"
+    ]
+  };
 }
 
 export async function predictHotspotsHybrid(): Promise<HybridHotspot[]> {

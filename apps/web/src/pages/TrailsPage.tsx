@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   Clock,
   MapPin,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -64,6 +65,8 @@ const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 export function TrailsPage() {
   const [trails, setTrails] = useState<TrailListItem[]>([]);
   const [detail, setDetail] = useState<TrailDetail | null>(null);
+  const [prediction, setPrediction] = useState<any>(null);
+  const [loadingPrediction, setLoadingPrediction] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,6 +89,16 @@ export function TrailsPage() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setDetail(data);
+
+      setPrediction(null);
+      setLoadingPrediction(true);
+      fetch(`${API}/trails/${id}/prediction`)
+        .then((r) => r.json())
+        .then((pred) => {
+          if (!pred.error) setPrediction(pred);
+        })
+        .catch(() => {})
+        .finally(() => setLoadingPrediction(false));
     } catch (e: any) {
       setError(e.message);
     }
@@ -266,6 +279,76 @@ export function TrailsPage() {
             })}
           </div>
         </Panel>
+
+        {/* 🔮 Mathematical Prediction Engine Forecast */}
+        {loadingPrediction && (
+          <Panel className="border-intel/30 bg-intel/5">
+            <div className="flex items-center gap-2 text-sm text-intel">
+              <Sparkles className="h-4 w-4 animate-spin" />
+              <span>Querying Python Mathematical Engine for next-hop & cash-out prediction...</span>
+            </div>
+          </Panel>
+        )}
+
+        {prediction && !loadingPrediction && (
+          <Panel className="border-intel/30 bg-intel/5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold flex items-center gap-2 text-ink-900 dark:text-ink-100">
+                <Sparkles className="h-5 w-5 text-intel" /> 🔮 Probabilistic Next-Hop Forecast (Python Engine)
+              </h3>
+              <Badge tone={prediction.is_predicted ? "intel" : "neutral"}>
+                {prediction.status || (prediction.is_predicted ? "IN_TRANSIT (PREDICTED)" : "CONFIRMED COMPLETED")}
+              </Badge>
+            </div>
+
+            {prediction.is_predicted && prediction.predictions ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-3 bg-white dark:bg-ink-900 rounded border border-ink-200 dark:border-ink-800">
+                    <div className="text-[10px] uppercase font-bold text-ink-400">Primary Predicted Next Hop</div>
+                    <div className="font-mono text-lg font-bold text-intel mt-1">
+                      {prediction.predictions.primary_node}
+                    </div>
+                    <div className="text-xs text-ink-500 mt-1">
+                      Likelihood: <span className="font-semibold text-intel">{prediction.predictions.primary_prob}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-white dark:bg-ink-900 rounded border border-ink-200 dark:border-ink-800">
+                    <div className="text-[10px] uppercase font-bold text-ink-400">Secondary Route / Drift Risk</div>
+                    <div className="font-mono text-sm font-semibold text-signal-amber mt-1">
+                      {prediction.predictions.secondary_node || "None"} ({prediction.predictions.secondary_prob || "0%"})
+                    </div>
+                    <div className="text-xs text-ink-500 mt-1">
+                      Unseen Mule Drift: <span className="font-semibold text-signal-rose">{prediction.predictions.novel_drift_risk}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-white dark:bg-ink-900 rounded border border-ink-200 dark:border-ink-800">
+                    <div className="text-[10px] uppercase font-bold text-ink-400">Predicted Cash-Out Endpoint</div>
+                    <div className="font-bold text-ink-900 dark:text-ink-100 text-base mt-1">
+                      {prediction.predictions.predicted_district}
+                    </div>
+                    <div className="text-xs text-ink-500 mt-1">
+                      {prediction.predictions.channel} • Conf: <span className="font-semibold text-intel">{prediction.predictions.location_confidence}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {prediction.plain_text_explanation && (
+                  <div className="p-3 rounded bg-white dark:bg-ink-950 text-xs font-mono text-ink-700 dark:text-ink-300 border border-ink-200 dark:border-ink-800">
+                    <span className="font-sans font-bold text-intel block mb-1">Tactical Briefing & Guidance:</span>
+                    {prediction.plain_text_explanation}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-ink-600 dark:text-ink-300">
+                Transaction path is complete. Funds terminated in confirmed withdrawal or destination.
+              </p>
+            )}
+          </Panel>
+        )}
 
         {/* Summary */}
         <Panel>

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTrail, getTrail, listTrails, updateTrailStatus } from "./service.js";
+import { createTrail, getMathematicalPrediction, getTrail, listTrails, updateTrailStatus } from "./service.js";
 
 export const trailsRouter = Router();
 
@@ -61,5 +61,15 @@ trailsRouter.patch("/:id/status", async (req, res) => {
     res.json(trail);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Get mathematical prediction from Python engine
+trailsRouter.get("/:id/prediction", async (req, res) => {
+  try {
+    const prediction = await getMathematicalPrediction(req.params.id);
+    return res.json(prediction);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
   }
 });

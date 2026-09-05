@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { 
-  Network, Share2, Activity, FileText, BrainCircuit,
+  Network, Share2, Activity, FileText, Sparkles, Play, Compass,
   ArrowRightLeft, BarChart3, Clock, AlertTriangle, ShieldAlert
 } from "lucide-react";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -15,21 +15,50 @@ export function IntelligencePage() {
   const [networkNodes, setNetworkNodes] = useState<any[]>([]);
   const [networkEdges, setNetworkEdges] = useState<any[]>([]);
   const [correlations, setCorrelations] = useState<any[]>([]);
+  const [engineStatus, setEngineStatus] = useState<any>(null);
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [selectedComplaintId, setSelectedComplaintId] = useState<string>("");
+  const [prediction, setPrediction] = useState<any>(null);
+  const [predicting, setPredicting] = useState(false);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch(`${API}/intelligence/summary`).then(res => res.json()),
       fetch(`${API}/intelligence/network`).then(res => res.json()),
-      fetch(`${API}/intelligence/correlations`).then(res => res.json())
-    ]).then(([sumData, netData, corrData]) => {
+      fetch(`${API}/intelligence/correlations`).then(res => res.json()),
+      fetch(`${API}/ml/models/active`).then(res => res.json()).catch(() => null),
+      fetch(`${API}/complaints`).then(res => res.json()).catch(() => [])
+    ]).then(([sumData, netData, corrData, modelData, compData]) => {
       setSummary(sumData);
       setNetworkNodes(netData.nodes || []);
       setNetworkEdges(netData.edges || []);
       setCorrelations(corrData || []);
+      setEngineStatus(modelData);
+      const matched = (compData || []).filter((c: any) => c.matchedTransactionId || c.matchedTransaction);
+      setComplaints(matched.length > 0 ? matched : compData || []);
+      if (matched.length > 0) setSelectedComplaintId(matched[0].id);
+      else if (compData && compData.length > 0) setSelectedComplaintId(compData[0].id);
       setLoading(false);
     }).catch(console.error);
   }, []);
+
+  const handleRunForecast = async () => {
+    if (!selectedComplaintId) return;
+    setPredicting(true);
+    setPredictionError(null);
+    try {
+      const res = await fetch(`${API}/trails/${selectedComplaintId}/prediction`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setPrediction(data);
+    } catch (e: any) {
+      setPredictionError(e.message || "Failed to contact prediction engine");
+    } finally {
+      setPredicting(false);
+    }
+  };
 
   if (loading) return <div className="p-8">Loading intelligence correlations...</div>;
 
@@ -106,19 +135,139 @@ export function IntelligencePage() {
              </div>
           </Panel>
 
-          <Panel>
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-              <BrainCircuit className="h-5 w-5 text-intel" /> ML Predictive Status
-            </h3>
-            <div className="flex items-start justify-between bg-ink-50 dark:bg-ink-900 p-4 rounded-lg">
-               <div>
-                 <h4 className="font-medium text-ink-900 dark:text-ink-100">LogisticRegression_v1</h4>
-                 <p className="text-sm text-ink-600 dark:text-ink-400 mt-1">Requires more historical withdrawal records for confident geospatial prediction.</p>
-               </div>
-               <Badge tone="warning">INSUFFICIENT DATA</Badge>
+          {/* Mathematical Prediction & NetworkX Forecast Engine */}
+          <Panel className="border-intel/30">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold flex items-center gap-2 text-ink-900 dark:text-ink-100">
+                <Sparkles className="h-5 w-5 text-intel" /> Mathematical Trajectory & Cash-Out Forecaster
+              </h3>
+              <Badge tone={engineStatus?.status === "ACTIVE" ? "intel" : "warning"}>
+                {engineStatus?.status === "ACTIVE" ? "PYTHON ENGINE: ACTIVE" : "PYTHON ENGINE: STANDBY (PORT 8000)"}
+              </Badge>
             </div>
-            <p className="text-xs text-ink-500 mt-3 italic">
-              Note: The system is using the Stage 5 deterministic/rule-based intelligence fallback. No artificial accuracy claims are made.
+
+            <div className="bg-ink-50 dark:bg-ink-900/60 p-4 rounded-lg border border-ink-200 dark:border-ink-800 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h4 className="font-semibold text-ink-900 dark:text-ink-100 text-sm">
+                    {engineStatus?.name || "NetworkX_Laplace_v1"}
+                  </h4>
+                  <p className="text-xs text-ink-500 mt-0.5">
+                    Algorithm: <span className="font-mono text-intel">{engineStatus?.algorithm || "Laplace Add-1 Smoothing & NetworkX MultiDiGraph"}</span>
+                  </p>
+                </div>
+                <div className="flex gap-1 flex-wrap">
+                  <span className="text-[10px] bg-intel/10 text-intel font-mono px-2 py-0.5 rounded">Laplace Add-1</span>
+                  <span className="text-[10px] bg-signal-amber/10 text-signal-amber font-mono px-2 py-0.5 rounded">Drift Risk %</span>
+                  <span className="text-[10px] bg-ink-200 dark:bg-ink-800 text-ink-600 dark:text-ink-400 font-mono px-2 py-0.5 rounded">Golden Hour 60m</span>
+                </div>
+              </div>
+
+              {/* Interactive Case Forecaster */}
+              <div className="pt-2 border-t border-ink-200 dark:border-ink-800/80">
+                <label className="text-[10px] uppercase font-bold text-ink-400 tracking-wider block mb-1.5">
+                  Select Case / Complaint to Forecast
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    className="flex-1 rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-950 px-2 py-1.5 text-xs text-ink-900 dark:text-ink-100"
+                    value={selectedComplaintId}
+                    onChange={(e) => {
+                      setSelectedComplaintId(e.target.value);
+                      setPrediction(null);
+                      setPredictionError(null);
+                    }}
+                  >
+                    {complaints.length === 0 && <option value="">No active complaints in database</option>}
+                    {complaints.map((c: any) => (
+                      <option key={c.id} value={c.id}>
+                        {c.complaintRef} — ₹{Number(c.amount).toLocaleString("en-IN")} ({c.victimAccount?.accountRef || "Victim"})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleRunForecast}
+                    disabled={predicting || !selectedComplaintId}
+                    className="flex items-center gap-1.5 rounded bg-intel text-white px-3 py-1.5 text-xs font-medium hover:bg-intel/90 disabled:opacity-50"
+                  >
+                    <Play className="h-3.5 w-3.5" />
+                    {predicting ? "Running..." : "Run Forecast"}
+                  </button>
+                </div>
+              </div>
+
+              {predictionError && (
+                <div className="p-2.5 rounded bg-signal-rose/10 border border-signal-rose/30 text-xs text-signal-rose">
+                  ⚠️ {predictionError}
+                  <div className="mt-1 text-[11px] opacity-80">
+                    Make sure the Python engine is running: <code>cd apps/python-engine && python main.py</code>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Prediction Output */}
+              {prediction && (
+                <div className="mt-3 space-y-3 pt-2 border-t border-ink-200 dark:border-ink-800">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-ink-900 dark:text-ink-100 flex items-center gap-1">
+                      <Compass className="h-3.5 w-3.5 text-intel" /> Money Trail Trajectory
+                    </span>
+                    <Badge tone={prediction.is_predicted ? "intel" : "neutral"}>
+                      {prediction.status || (prediction.is_predicted ? "IN_TRANSIT" : "COMPLETED")}
+                    </Badge>
+                  </div>
+
+                  {prediction.money_trail_string && (
+                    <div className="p-2 rounded bg-white dark:bg-ink-950 font-mono text-xs text-ink-800 dark:text-ink-200 border border-ink-200 dark:border-ink-800 overflow-x-auto">
+                      {prediction.money_trail_string}
+                    </div>
+                  )}
+
+                  {prediction.is_predicted && prediction.predictions ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                        <div className="text-[10px] uppercase text-ink-400">Primary Next Hop</div>
+                        <div className="font-mono font-bold text-intel text-sm mt-0.5">
+                          {prediction.predictions.primary_node}
+                        </div>
+                        <div className="text-[11px] text-ink-500 mt-0.5">
+                          Likelihood: <span className="font-semibold text-intel">{prediction.predictions.primary_prob}</span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                        <div className="text-[10px] uppercase text-ink-400">Drift Risk (New Mule)</div>
+                        <div className="font-mono font-bold text-signal-rose text-sm mt-0.5">
+                          {prediction.predictions.novel_drift_risk}
+                        </div>
+                        <div className="text-[11px] text-ink-500 mt-0.5">
+                          Secondary: {prediction.predictions.secondary_node || "None"} ({prediction.predictions.secondary_prob || "0%"})
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                        <div className="text-[10px] uppercase text-ink-400">Predicted Cash-Out</div>
+                        <div className="font-bold text-ink-900 dark:text-ink-100 text-sm mt-0.5">
+                          {prediction.predictions.predicted_district}
+                        </div>
+                        <div className="text-[11px] text-ink-500 mt-0.5">
+                          Confidence: <span className="font-semibold text-intel">{prediction.predictions.location_confidence}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {prediction.plain_text_explanation && (
+                    <div className="p-2.5 rounded bg-intel/5 border border-intel/20 text-xs text-ink-700 dark:text-ink-300 font-mono">
+                      <span className="font-sans font-bold text-intel block mb-0.5">Investigator Briefing:</span>
+                      {prediction.plain_text_explanation}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <p className="text-[11px] text-ink-500 mt-2.5 italic">
+              Powered by NetworkX MultiDiGraph & Laplace Add-1 Smoothing. Computes candidate route probabilities with novel account drift assessment.
             </p>
           </Panel>
         </div>

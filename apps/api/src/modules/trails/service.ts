@@ -419,3 +419,100 @@ function generateSummary(
 
   return text;
 }
+
+const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || "http://localhost:8000";
+
+export async function getMathematicalPrediction(complaintOrTrailId: string) {
+  // 1. Fetch complaint and matching transaction (support both complaintId and trailId)
+  let complaint = await prisma.complaint.findUnique({
+    where: { id: complaintOrTrailId },
+    include: {
+      matchedTransaction: {
+        include: {
+          receiverAccount: true,
+          senderAccount: true,
+        },
+      },
+    },
+  });
+
+  if (!complaint) {
+    const trail = await prisma.trail.findUnique({
+      where: { id: complaintOrTrailId },
+      include: {
+        complaint: {
+          include: {
+            matchedTransaction: {
+              include: {
+                receiverAccount: true,
+                senderAccount: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (trail) {
+      complaint = trail.complaint;
+    }
+  }
+
+  if (!complaint) {
+    throw new Error(`Complaint or Trail ${complaintOrTrailId} not found`);
+  }
+
+  // 2. Fetch all normalized bank transactions
+  const transactions = await prisma.transaction.findMany({
+    include: {
+      senderAccount: true,
+      receiverAccount: true,
+    },
+  });
+
+  // 3. Format payload to match Python FastAPI Pydantic schema
+  const initialBeneficiary =
+    complaint.matchedTransaction?.receiverAccount?.accountRef ||
+    transactions[0]?.receiverAccount?.accountRef ||
+    "ACC_DEFAULT";
+
+  const payload = {
+    complaint: {
+      complaint_id: complaint.id,
+      category: (complaint as any).category || "Financial Cyber Fraud",
+      initial_beneficiary: initialBeneficiary,
+      amount: Number(complaint.amount),
+      timestamp_filed: (complaint.matchedTransaction?.timestamp || complaint.timestamp)
+        .toISOString()
+        .replace("T", " ")
+        .substring(0, 19),
+    },
+    transactions: transactions.map((t) => ({
+      trans_id: t.sourceTransactionId || t.id,
+      source_account: t.senderAccount?.accountRef || "UNKNOWN_SRC",
+      dest_account: t.receiverAccount?.accountRef || "UNKNOWN_DST",
+      amount: Number(t.amount),
+      channel: t.transactionMode || "UPI",
+      timestamp: t.timestamp.toISOString().replace("T", " ").substring(0, 19),
+      district: t.locationCity || "N/A",
+    })),
+  };
+
+  // 4. Send payload to Python FastAPI engine
+  try {
+    const response = await fetch(`${PYTHON_ENGINE_URL}/api/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Python engine responded with status ${response.status}: ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    console.error("[Python Engine Integration Error]:", error.message);
+    throw new Error("Mathematical prediction engine is unavailable.");
+  }
+}

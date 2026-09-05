@@ -74,11 +74,27 @@ export function DataSourcesPage() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
+      const autoMapping: Record<string, string> = {};
+      for (const col of data.columns) {
+        const c = col.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (c === "txnid" || c === "transactionid" || c === "txid") autoMapping[col] = "transactionId";
+        else if (c === "time" || c === "timestamp" || c === "txntime" || c === "date") autoMapping[col] = "timestamp";
+        else if (c === "fromacc" || c === "sender" || c === "fromaccount" || c === "senderaccount") autoMapping[col] = "senderAccount";
+        else if (c === "toacc" || c === "receiver" || c === "toaccount" || c === "receiveraccount" || c === "beneficiary") autoMapping[col] = "receiverAccount";
+        else if (c.includes("amount") || c === "amt") autoMapping[col] = "amount";
+        else if (c === "txnmode" || c === "mode" || c === "channel") autoMapping[col] = "transactionMode";
+        else if (c === "transfertype") autoMapping[col] = "transferType";
+        else if (c === "sendertype" || c === "senderaccounttype") autoMapping[col] = "senderAccountType";
+        else if (c === "receivertype" || c === "receiveraccounttype") autoMapping[col] = "receiverAccountType";
+        else if (c === "city" || c === "location") autoMapping[col] = "city";
+      }
+
       setWizardState({
-        ...wizardState,
         uploadId: data.upload.id,
         columns: data.columns,
-        preview: data.preview
+        preview: data.preview,
+        mapping: autoMapping,
+        validation: null
       });
       fetchSources();
       setActiveFile(null);
