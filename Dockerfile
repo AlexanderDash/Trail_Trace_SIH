@@ -23,7 +23,8 @@ COPY apps/web ./apps/web
 COPY apps/python-engine ./apps/python-engine
 COPY sample_data ./sample_data
 
-# 4. Generate Prisma Client & Build Frontend
+# 4. Generate Prisma Client, Migrate SQLite & Seed Demo Data
+ENV DATABASE_URL="file:./dev.db"
 WORKDIR /app/apps/api
 RUN npx prisma generate
 RUN npx prisma db push --skip-generate
