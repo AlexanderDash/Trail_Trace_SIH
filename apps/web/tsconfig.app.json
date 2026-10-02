@@ -19,7 +19,8 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@anvesh/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src"]

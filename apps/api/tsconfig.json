@@ -9,7 +9,11 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@anvesh/shared": ["../../packages/shared/src/index.ts"]
+    }
   },
   "include": ["src", "prisma/seed.ts"]
 }

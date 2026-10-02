@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import cors from "cors";
 import express from "express";
 import morgan from "morgan";
@@ -55,6 +57,16 @@ export function createApp() {
   app.use("/api/v1/intelligence", intelligenceRouter);
   app.use("/api/v1/risk", riskRouter);
   app.use("/api/v1/reports", reportsRouter);
+
+  // In production, serve the built Vite web client directly
+  const webDistPath = path.resolve(process.cwd(), "apps/web/dist");
+  if (fs.existsSync(webDistPath)) {
+    app.use(express.static(webDistPath));
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api/")) return next();
+      res.sendFile(path.join(webDistPath, "index.html"));
+    });
+  }
 
   app.use((_req, res) => {
     res.status(404).json({ error: "Not found" });

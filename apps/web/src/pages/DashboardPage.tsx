@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import type { DashboardSummary } from "@anvesh/shared";
+import type { DashboardSummary, ModuleStatus } from "@anvesh/shared";
 import {
   Bell,
   Building2,
@@ -232,7 +232,7 @@ export function DashboardPage() {
         <Panel>
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink-400">Module status</h2>
           <ul className="mt-4 space-y-2">
-            {(summary?.modules ?? []).map((module) => (
+            {(summary?.modules ?? []).map((module: ModuleStatus) => (
               <li
                 key={module.key}
                 className="flex items-start justify-between gap-4 rounded-lg bg-ink-50 px-3 py-2 dark:bg-ink-800/50"
