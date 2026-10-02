@@ -7,7 +7,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from core.next_hop import trace_active_path
 
-app = FastAPI(title="TrailTrace Python Mathematical Prediction Engine")
+app = FastAPI(title="ANVESH Predictive Interdiction Engine")
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,7 +110,53 @@ def predict_trail_endpoint(payload: PredictionRequest):
             "golden_hour_remaining_minutes": round(golden_left, 1)
         }
 
+        # Expected Value (EV) calculation for Macro Prioritization Queue
+        prob_val = 65.0
+        if "predictions" in result:
+            try:
+                prob_val = float(str(result["predictions"].get("primary_prob", "65")).replace("%", ""))
+            except:
+                prob_val = 65.0
+        
+        ev_factor = min(1.0, max(0.25, golden_left / 60.0))
+        result["expected_value_inr"] = round(amount * (prob_val / 100.0) * ev_factor, 2)
+
+        # 4-Tier Evidence Graded Signals according to ANVESH specification
+        step_count = len(result.get("steps", []))
+        pred_obj = result.get("predictions", {})
+        result["evidence_graded_signals"] = [
+            {
+                "tier": "OBSERVED",
+                "tag": "[Observed]",
+                "color": "blue",
+                "title": "Confirmed Transaction Hops",
+                "detail": f"{step_count} verified digital payment hops logged from victim account {start_acc}."
+            },
+            {
+                "tier": "LINKED",
+                "tag": "[Linked]",
+                "color": "amber",
+                "title": "Cross-Bank Mule Routing",
+                "detail": f"Flow traversed {len(result.get('node_path', []))} graph nodes across multi-banking payment rails."
+            },
+            {
+                "tier": "INFERRED",
+                "tag": "[Inferred]",
+                "color": "purple",
+                "title": "Rails Physics & Velocity Constraint",
+                "detail": f"Turnover velocity and payment-rail constraints indicate active liquidation window ({urgency_tier})."
+            },
+            {
+                "tier": "PREDICTED",
+                "tag": "[Predicted]",
+                "color": "rose",
+                "title": "STKDE Cash-Out Forecast",
+                "detail": f"Primary target node: {pred_obj.get('primary_node', 'ATM Terminal')} ({pred_obj.get('primary_prob', '65%')}) in {pred_obj.get('predicted_district', 'Regional Hotspot')}."
+            }
+        ]
+
         return result
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

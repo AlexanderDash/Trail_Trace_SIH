@@ -1,5 +1,5 @@
-export const APP_NAME = "TrailTrace";
-export const APP_TAGLINE = "Cybercrime Financial Intelligence";
+export const APP_NAME = "ANVESH";
+export const APP_TAGLINE = "Predictive Cybercrime Interdiction Framework";
 export const PROBLEM_STATEMENT = "SIH 26184";
 
 export type ModuleKey =

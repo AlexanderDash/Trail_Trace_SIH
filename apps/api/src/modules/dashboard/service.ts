@@ -1,10 +1,11 @@
-import type { DashboardSummary } from "@trailtrace/shared";
+import type { DashboardSummary } from "@anvesh/shared";
 import { prisma } from "../../lib/prisma.js";
 import { MODULE_CATALOG } from "../../lib/modules.js";
 import { analyzeGeospatialHotspots } from "../geospatial/service.js";
+import { analyzeAllAccounts } from "../risk/scorer.js";
 
 export async function getDashboardSummary(databaseConnected: boolean): Promise<DashboardSummary> {
-  const [
+  let [
     transactions,
     banks,
     activeComplaints,
@@ -35,6 +36,19 @@ export async function getDashboardSummary(databaseConnected: boolean): Promise<D
         prisma.investigation.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } })
       ])
     : [0, 0, 0, 0, 0, 0, 0, [], 0];
+
+  // If there are transactions/trails but accounts haven't been evaluated yet, run auto-analysis
+  if (databaseConnected && trackedTrails > 0 && (highRiskAccounts === 0 || watchedAccounts === 0 || activeAlerts === 0)) {
+    await analyzeAllAccounts();
+    [watchedAccounts, highRiskAccounts, activeAlerts] = await Promise.all([
+      prisma.watchlistAccount.count({ where: { status: { not: "CLEARED" } } }),
+      prisma.account.count({
+        where: { riskStatus: { in: ["high", "critical"] } },
+      }),
+      prisma.alert.count({ where: { acknowledged: false } }),
+    ]);
+  }
+
 
   return {
     synthetic: true,

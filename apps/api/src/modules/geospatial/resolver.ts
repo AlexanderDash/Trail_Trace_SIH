@@ -19,6 +19,16 @@ const GEOCODING_DB: Record<string, Coordinates> = {
   "pune": { city: "Pune", latitude: 18.5204, longitude: 73.8567 },
   "bengaluru": { city: "Bengaluru", latitude: 12.9716, longitude: 77.5946 },
   "hyderabad": { city: "Hyderabad", latitude: 17.3850, longitude: 78.4867 },
+  "kolkata": { city: "Kolkata", latitude: 22.5726, longitude: 88.3639 },
+  "jaipur": { city: "Jaipur", latitude: 26.9124, longitude: 75.7873 },
+  "ahmedabad": { city: "Ahmedabad", latitude: 23.0225, longitude: 72.5714 },
+  "mewat": { city: "Mewat", latitude: 28.0069, longitude: 77.0195 },
+  "lucknow": { city: "Lucknow", latitude: 26.8467, longitude: 80.9462 },
+  "patna": { city: "Patna", latitude: 25.5941, longitude: 85.1376 },
+  "bhubaneswar": { city: "Bhubaneswar", latitude: 20.2961, longitude: 85.8245 },
+  "nagpur": { city: "Nagpur", latitude: 21.1458, longitude: 79.0882 },
+  "surat": { city: "Surat", latitude: 21.1702, longitude: 72.8311 },
+  "chennai": { city: "Chennai", latitude: 13.0827, longitude: 80.2707 },
 };
 
 export class LocationResolver {

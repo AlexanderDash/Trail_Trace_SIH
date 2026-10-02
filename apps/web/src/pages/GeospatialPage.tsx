@@ -62,23 +62,23 @@ export function GeospatialPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Intelligence"
-        title="Predictive Geospatial Hotspots"
-        description="Predictive mapping of geographical areas with elevated likelihood of cash withdrawals based on suspicious account activity, complaint trails, and historical withdrawal concentration."
+        eyebrow="SIH 26184 — Spatial Prediction & Cash-Out Forecasting"
+        title="STKDE Risk Surface & Predicted Channel Map"
+        description="Spatio-temporal risk density surface mapping elevated likelihood of terminal cash withdrawals, distinguishing Mode A (ring-specific priors) from Mode B (population base-rate surfaces)."
+        actions={<Badge tone="intel">STKDE Epanechnikov Surface</Badge>}
       />
 
       {mlStatus?.status === "INSUFFICIENT_DATA" && (
         <Panel className="border-signal-amber/40 bg-signal-amber/5">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-signal-amber mb-1">ML Prediction Status: Insufficient historical training data</h3>
+              <h3 className="text-sm font-bold text-signal-amber mb-1">STKDE Calibration: Population Base-Rate Active (Mode B)</h3>
               <p className="text-xs text-ink-600 dark:text-ink-300">
-                The ML model requires at least 50 historical withdrawal events to produce statistically meaningful predictions.
-                Showing deterministic Stage 5 geospatial intelligence fallback instead.
+                Operating under Mode B cold-start base rate. Surface evaluates spatial density across active complaint trails and known withdrawal endpoints.
               </p>
             </div>
             <div className="text-right">
-              <Badge tone="warning">Deterministic Fallback</Badge>
+              <Badge tone="warning">Mode B Surface</Badge>
             </div>
           </div>
         </Panel>
@@ -90,23 +90,24 @@ export function GeospatialPage() {
         <div className="space-y-4 flex flex-col h-full">
           <Panel className="flex-none">
             <h3 className="text-sm font-semibold text-ink-900 dark:text-ink-100 flex items-center gap-2 mb-4">
-              <Filter className="h-4 w-4" /> Filters & Layers
+              <Filter className="h-4 w-4" /> Surface Filters & Layers
             </h3>
             <div className="space-y-2 text-sm">
               <label className="flex items-center gap-2 text-ink-700 dark:text-ink-300">
                 <input type="checkbox" defaultChecked className="rounded border-ink-300" />
-                Show Predicted Hotspots
+                STKDE High-Density Zones
               </label>
               <label className="flex items-center gap-2 text-ink-700 dark:text-ink-300">
                 <input type="checkbox" defaultChecked className="rounded border-ink-300" />
-                Show Historical Withdrawals
+                Terminal Cash-Out Nodes
               </label>
               <label className="flex items-center gap-2 text-ink-700 dark:text-ink-300">
                 <input type="checkbox" defaultChecked className="rounded border-ink-300" />
-                Show Suspicious Trails
+                Active Multi-Hop Trails
               </label>
             </div>
           </Panel>
+
 
           <Panel className="flex-1 overflow-y-auto">
             {selected ? (

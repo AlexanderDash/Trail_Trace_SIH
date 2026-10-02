@@ -6,7 +6,10 @@ import {
   Clock,
   MapPin,
   Sparkles,
+  Target,
 } from "lucide-react";
+
+
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";
@@ -190,6 +193,36 @@ export function TrailsPage() {
           </Panel>
         </div>
 
+        {/* Interdiction Choke-Point Advisory */}
+        {prediction?.interdiction && (
+          <Panel className="border-intel/30 bg-intel/5">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-intel" />
+                <h3 className="font-bold text-sm text-intel uppercase tracking-wide">
+                  Choke-Point Interdiction Advisory
+                </h3>
+              </div>
+              <Badge tone="danger">RECOMMENDED INTERCEPTION POINT</Badge>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-3 text-xs pt-1">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-ink-400 block">Critical Node</span>
+                <span className="font-mono font-bold text-ink-900 dark:text-ink-100 text-base">
+                  {prediction.interdiction.choke_point_node}
+                </span>
+                <span className="text-[10px] text-ink-500 block">Centrality Choke Score: {prediction.interdiction.choke_point_score} / 1.0</span>
+              </div>
+              <div className="sm:col-span-2">
+                <span className="text-[10px] uppercase font-bold text-ink-400 block">What-If Reroute Friction & Impact</span>
+                <p className="text-ink-700 dark:text-ink-300">
+                  {prediction.interdiction.what_if_reroute?.impact || "Freezing this account imposes significant friction and disrupts downstream liquidation."}
+                </p>
+              </div>
+            </div>
+          </Panel>
+        )}
+
         {/* Trail Visualization */}
         <Panel>
           <h3 className="mb-6 text-lg font-semibold text-ink-900 dark:text-ink-100 flex items-center gap-2">
@@ -223,9 +256,11 @@ export function TrailsPage() {
                     <div className="flex-1 rounded-lg border border-ink-200 dark:border-ink-800 bg-ink-50 dark:bg-ink-900/30 p-4">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="font-mono text-lg font-semibold text-ink-900 dark:text-ink-100">{node.accountRef}</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold">[Observed]</span>
                         <Badge tone={isVictim ? "danger" : "intel"}>{node.bankCode}</Badge>
                         <span className="text-[10px] uppercase tracking-wider text-ink-400">{node.role.replace("_", " ")}</span>
                       </div>
+
 
                       {!isVictim && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
@@ -363,10 +398,12 @@ export function TrailsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Money trail investigations"
-        title="Trails"
-        description="Cross-bank transaction trails traced from matched complaints. Each trail follows funds through accounts across bank boundaries."
+        eyebrow="SIH 26184 — Multi-Hop Reconstruction"
+        title="Money Trail Trajectories & Interdiction"
+        description="Cross-bank transaction trails reconstructed from matched complaints, featuring evidence-graded hops, predictive cash-out trajectories, and interdiction choke points."
+        actions={<Badge tone="intel">ANVESH Traversal Engine</Badge>}
       />
+
 
       {error && <Panel className="border-signal-rose/40"><p className="text-sm text-signal-rose">{error}</p></Panel>}
 

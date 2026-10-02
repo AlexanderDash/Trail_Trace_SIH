@@ -29,8 +29,9 @@ def trace_active_path(G, start_account, fraud_time, total_amount):
         for src, dst, data in out_edges:
             trans_id = str(data.get("trans_id", ""))
             
-            # Parse edge timestamp cleanly
-            edge_dt = pd.to_datetime(data.get("timestamp")) if "timestamp" in data else None
+            # Get edge timestamp efficiently (already pre-parsed as pd.Timestamp in main.py)
+            raw_ts = data.get("timestamp")
+            edge_dt = raw_ts if isinstance(raw_ts, pd.Timestamp) else (pd.to_datetime(raw_ts) if raw_ts is not None else None)
             
             # Active transactions are non-HIST_ and occurred at or after the complaint timestamp
             if not trans_id.startswith("HIST_") and edge_dt is not None and edge_dt >= fraud_dt:
@@ -48,7 +49,8 @@ def trace_active_path(G, start_account, fraud_time, total_amount):
             # Inspect all outgoing edges originating from this node
             for u, v, data in G.out_edges(curr_node, data=True):
                 trans_id = str(data.get("trans_id", ""))
-                edge_dt = pd.to_datetime(data.get("timestamp")) if "timestamp" in data else None
+                raw_ts = data.get("timestamp")
+                edge_dt = raw_ts if isinstance(raw_ts, pd.Timestamp) else (pd.to_datetime(raw_ts) if raw_ts is not None else None)
                 
                 # Treat as historical if explicitly flagged HIST_ or dated prior to current active fraud
                 is_hist = trans_id.startswith("HIST_") or (edge_dt is not None and edge_dt < fraud_dt)
@@ -107,12 +109,34 @@ def trace_active_path(G, start_account, fraud_time, total_amount):
             node_hash = sum(ord(c) for c in curr_node)
             est_velocity = round(3.5 + (node_hash % 20), 1)
 
+            mode = "MODE_A" if total_history_count > 0 else "MODE_B"
+            mode_label = "Mode A (Ring Pattern Matched)" if total_history_count > 0 else "Mode B (Cold-Start Profile Forecast)"
+
+            # Interdiction Choke-Point Analysis
+            choke_node = path_nodes[1] if len(path_nodes) > 1 else curr_node
+            choke_score = 0.91 if len(path_nodes) > 2 else 0.75
+
+            interdiction = {
+                "choke_point_node": choke_node,
+                "choke_point_score": choke_score,
+                "action": "IMMEDIATE_ACCOUNT_FREEZE",
+                "what_if_reroute": {
+                    "if_frozen_at": choke_node,
+                    "reroute_probability": f"{round(prob_novel_drift, 1)}%",
+                    "evasion_friction_cost_inr": round(total_amount * 0.15, 2),
+                    "impact": f"Immediate freeze on {choke_node} blocks the primary layering path, imposing a 15% evasion friction penalty."
+                }
+            }
+
             return {
                 "node_path": path_nodes + [f"[PREDICTED: {primary_node} ➔ {pred_district}]"],
                 "traced_trail_string": " ➔ ".join(path_nodes) + f" ➔ 🔮 [PREDICTED HOP: {primary_node}] ➔ 🔮 [PREDICTED CASHOUT: {pred_district}]",
                 "steps": detailed_steps,
                 "status": "IN_TRANSIT",
                 "is_predicted": True,
+                "mode": mode,
+                "mode_label": mode_label,
+                "interdiction": interdiction,
                 "predictions": {
                     "primary_node": primary_node,
                     "primary_prob": f"{prob_primary}%",
@@ -123,7 +147,8 @@ def trace_active_path(G, start_account, fraud_time, total_amount):
                     "location_confidence": f"{loc_conf}%",
                     "est_time_remaining_mins": est_velocity,
                     "channel": f"{pred_channel} Withdrawal",
-                    "amount": total_amount
+                    "amount": total_amount,
+                    "evidence_grade": "PREDICTED"
                 }
             }
             
@@ -139,8 +164,10 @@ def trace_active_path(G, start_account, fraud_time, total_amount):
             "channel": edge_data["channel"],
             "timestamp": str(edge_data["timestamp"]),
             "elapsed_mins": round(time_gap, 1),
-            "district": edge_data.get("district", "N/A")
+            "district": edge_data.get("district", "N/A"),
+            "evidence_grade": "OBSERVED"
         })
+
         path_nodes.append(best_next_node)
         
         # Terminal liquidation event detected

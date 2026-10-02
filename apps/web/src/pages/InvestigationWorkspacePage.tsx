@@ -130,17 +130,19 @@ export function InvestigationWorkspacePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Investigation Workspace"
+        eyebrow="SIH 26184 — Case Reconstruction & Interdiction Workspace"
         title={inv.caseNumber}
         description={inv.title}
         actions={
-          <div className="flex gap-2">
-            <button onClick={handleDownloadReport} className="flex items-center gap-2 rounded bg-ink-900 text-white px-4 py-2 text-sm hover:bg-ink-800 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white">
-              <Download className="h-4 w-4" /> Export Report
+          <div className="flex items-center gap-2">
+            <button onClick={handleDownloadReport} className="flex items-center gap-2 rounded bg-intel text-white px-3.5 py-1.5 text-xs font-medium hover:bg-intel/90 shadow-sm transition-colors">
+              <Download className="h-4 w-4" /> Export ANVESH Forensic Report
             </button>
+            <Badge tone="intel">ANVESH Case Matrix</Badge>
           </div>
         }
       />
+
 
       {/* Overview Bar */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -257,13 +259,15 @@ export function InvestigationWorkspacePage() {
               <FileSignature className="h-5 w-5 text-intel" /> Investigator Findings
             </h3>
             <div className="mb-4">
-              <select value={findingType} onChange={e => setFindingType(e.target.value)} className="w-full text-sm p-2 mb-2 rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900">
-                <option value="OBSERVATION">Observation</option>
-                <option value="CORRELATION">Correlation</option>
-                <option value="RISK_ASSESSMENT">Risk Assessment</option>
-                <option value="LOCATION_ASSESSMENT">Location Assessment</option>
-                <option value="CONCLUSION">Conclusion</option>
+              <select value={findingType} onChange={e => setFindingType(e.target.value)} className="w-full text-xs font-mono p-2 mb-2 rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900">
+                <option value="[OBSERVED] DIGITAL_EVIDENCE">[Observed] Digital Ledger Transfer</option>
+                <option value="[LINKED] MULE_CORRELATION">[Linked] Cross-Bank Mule Correlation</option>
+                <option value="[INFERRED] RAILS_VIOLATION">[Inferred] Rails Physics & Velocity Signal</option>
+                <option value="[PREDICTED] CASHOUT_FORECAST">[Predicted] STKDE Cash-Out Terminal</option>
+                <option value="CHOKE_POINT_INTERDICTION">Choke-Point Interdiction / Freeze Advisory</option>
+                <option value="CONCLUSION">Case Conclusion & Escalation</option>
               </select>
+
               <textarea 
                 placeholder="Log a formal finding..." 
                 value={findingDesc} onChange={e => setFindingDesc(e.target.value)}

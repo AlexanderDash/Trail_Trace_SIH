@@ -1,0 +1,11 @@
+complaint_id,complaint_date,victim_account_no,complaint,amount_lost_inr,txn_mode,city,suspected_transaction_id,status
+CMP001,2026-09-05 10:00:00,VIC_10,An unauthorized transaction was made from my account without my knowledge or consent.,250000,IMPS,Delhi,TXN101,Under Investigation
+CMP002,2026-09-05 10:04:00,VIC_11,I received a fraudulent call and an unauthorized transfer was subsequently made from my account.,180000,NEFT,Mumbai,TXN102,Under Investigation
+CMP003,2026-09-05 10:06:00,VIC_12,Money was transferred from my account through an online scam without my authorization.,160000,UPI,Noida,TXN103,Under Investigation
+CMP004,2026-09-05 10:08:00,VIC_13,An unauthorized transaction was made from my account after I was deceived by a scammer.,140000,IMPS,Kolkata,TXN104,Under Investigation
+CMP005,2026-09-05 10:10:00,VIC_14,Defrauded through an algorithmic stock trading Telegram scheme promising guaranteed returns.,320000,RTGS,Bengaluru,TXN105,Under Investigation
+CMP006,2026-09-05 10:14:00,VIC_15,Threatening SMS regarding urgent electricity disconnection tricked me into installing a malicious APK.,480000,IMPS,Hyderabad,TXN106,Under Investigation
+CMP007,2026-09-05 10:18:00,VIC_16,Blackmailed under digital arrest by fraudsters posing as narcotics bureau and CBI officials.,750000,NEFT,Pune,TXN107,Under Investigation
+CMP008,2026-09-05 10:22:00,VIC_17,Extorted by a fraudulent courier caller claiming contraband package impounded at customs.,210000,UPI,Ahmedabad,TXN108,Under Investigation
+CMP009,2026-09-05 10:26:00,VIC_18,Deceived by part-time hotel rating task scam with initial small payouts before freezing deposits.,390000,IMPS,Jaipur,TXN109,Under Investigation
+CMP010,2026-09-05 10:30:00,VIC_19,Loan app harassment ring demanded urgent repayment into undisclosed mule bank accounts.,175000,UPI,Lucknow,TXN110,Under Investigation

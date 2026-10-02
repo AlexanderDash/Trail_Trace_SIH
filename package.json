@@ -1,21 +1,23 @@
 {
-  "name": "trailtrace",
+  "name": "anvesh",
   "version": "0.1.0",
   "private": true,
-  "description": "TrailTrace — predictive analytics foundation for cybercrime financial intelligence (SIH 26184). Synthetic demo only.",
+  "description": "ANVESH — predictive analytics and cybercrime interdiction framework (SIH 26184). Synthetic demo only.",
   "workspaces": [
     "apps/api",
     "apps/web",
     "packages/shared"
   ],
   "scripts": {
-    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @trailtrace/api\" \"npm run dev -w @trailtrace/web\"",
-    "build": "npm run build -w @trailtrace/api && npm run build -w @trailtrace/web",
-    "typecheck": "npm run typecheck -w @trailtrace/shared && npm run typecheck -w @trailtrace/api && npm run typecheck -w @trailtrace/web",
-    "db:generate": "npm run prisma:generate -w @trailtrace/api",
-    "db:migrate": "npm run prisma:migrate -w @trailtrace/api",
-    "db:seed": "npm run prisma:seed -w @trailtrace/api",
-    "db:reset": "npm run prisma:reset -w @trailtrace/api"
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @anvesh/api\" \"npm run dev -w @anvesh/web\"",
+    "dev:all": "concurrently -n api,web,engine -c cyan,magenta,yellow \"npm run dev -w @anvesh/api\" \"npm run dev -w @anvesh/web\" \"npm run engine:start\"",
+    "engine:start": "cd apps/python-engine && (.\\venv\\Scripts\\python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload || python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload)",
+    "build": "npm run build -w @anvesh/api && npm run build -w @anvesh/web",
+    "typecheck": "npm run typecheck -w @anvesh/shared && npm run typecheck -w @anvesh/api && npm run typecheck -w @anvesh/web",
+    "db:generate": "npm run prisma:generate -w @anvesh/api",
+    "db:migrate": "npm run prisma:migrate -w @anvesh/api",
+    "db:seed": "npm run prisma:seed -w @anvesh/api",
+    "db:reset": "npm run prisma:reset -w @anvesh/api"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

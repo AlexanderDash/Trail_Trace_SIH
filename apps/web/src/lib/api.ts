@@ -1,4 +1,4 @@
-import type { ApiListResponse, BankRecord, DashboardSummary, HealthResponse, SystemInfo } from "@trailtrace/shared";
+import type { ApiListResponse, BankRecord, DashboardSummary, HealthResponse, SystemInfo } from "@anvesh/shared";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 

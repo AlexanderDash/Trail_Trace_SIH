@@ -18,6 +18,10 @@ import { mlRouter } from "./modules/ml/routes.js";
 import { investigationsRouter } from "./modules/investigations/routes.js";
 import { intelligenceRouter } from "./modules/intelligence/routes.js";
 
+import { transactionsRouter } from "./modules/transactions/routes.js";
+import { reportsRouter } from "./modules/reports/routes.js";
+import { riskRouter } from "./modules/risk/routes.js";
+
 export function createApp() {
   const app = express();
 
@@ -27,7 +31,7 @@ export function createApp() {
 
   app.get("/", (_req, res) => {
     res.json({
-      name: "TrailTrace API",
+      name: "ANVESH API",
       synthetic: true,
       docs: "/api/v1/health",
     });
@@ -38,45 +42,19 @@ export function createApp() {
   app.use("/api/v1/banks", banksRouter);
   app.use("/api/v1/data-sources", banksRouter);
   app.use("/api/v1/ingestion", ingestionRouter);
+  app.use("/api/v1/transactions", transactionsRouter);
   app.use("/api/v1/complaints", complaintsRouter);
   app.use("/api/v1/trails", trailsRouter);
   app.use("/api/v1/accounts", accountsRouter);
   app.use("/api/v1/watchlist", watchlistRouter);
   app.use("/api/v1/alerts", alertsRouter);
   app.use("/api/v1/geospatial", geospatialRouter);
+  app.use("/api/v1/geo", geospatialRouter);
   app.use("/api/v1/ml", mlRouter);
   app.use("/api/v1/investigations", investigationsRouter);
   app.use("/api/v1/intelligence", intelligenceRouter);
-
-  app.use(
-    "/api/v1/transactions",
-    notImplementedRouter(
-      "transactions",
-      "Normalized transaction query APIs will be implemented after ingestion.",
-    ),
-  );
-
-  app.use(
-    "/api/v1/risk",
-    notImplementedRouter(
-      "risk",
-      "Behavioural risk scoring is integrated into the accounts endpoints.",
-    ),
-  );
-  app.use(
-    "/api/v1/geo",
-    notImplementedRouter(
-      "geo",
-      "Geographic intelligence is not implemented yet. ATM locations may be plotted later; ATM control is out of scope.",
-    ),
-  );
-  app.use(
-    "/api/v1/reports",
-    notImplementedRouter(
-      "reports",
-      "Reporting is not implemented yet.",
-    ),
-  );
+  app.use("/api/v1/risk", riskRouter);
+  app.use("/api/v1/reports", reportsRouter);
 
   app.use((_req, res) => {
     res.status(404).json({ error: "Not found" });

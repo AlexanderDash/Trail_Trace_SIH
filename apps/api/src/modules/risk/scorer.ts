@@ -182,8 +182,7 @@ export async function analyzeAccountRisk(accountId: string) {
 
   // Watchlist threshold check (Recommend for watchlist if HIGH/CRITICAL and not already monitored)
   if (finalScore >= THRESHOLDS.HIGH && account.watchlistStatus === "none") {
-    // We could auto-create a recommendation alert, but for now we'll just return it in the API.
-    // The prompt says "provide an option to recommend for watchlist". This can be a UI concern.
+    // Flagged for watchlist
   }
 
   return {
@@ -193,3 +192,60 @@ export async function analyzeAccountRisk(accountId: string) {
     features,
   };
 }
+
+export async function analyzeAllAccounts() {
+  const accounts = await prisma.account.findMany({
+    where: {
+      OR: [
+        { sentTransactions: { some: {} } },
+        { receivedTransactions: { some: {} } },
+        { trailNodes: { some: {} } }
+      ]
+    }
+  });
+
+  const results = [];
+  for (const acc of accounts) {
+    try {
+      const res = await analyzeAccountRisk(acc.id);
+      results.push({ accountId: acc.id, accountRef: acc.accountRef, ...res });
+
+      if (res.level === "HIGH" || res.level === "CRITICAL") {
+        const existingWatchlist = await prisma.watchlistAccount.findUnique({ where: { accountId: acc.id } });
+        if (!existingWatchlist) {
+          await prisma.watchlistAccount.create({
+            data: {
+              accountId: acc.id,
+              reason: `Automated behavioural risk threshold reached (${res.score}/100 - ${res.level}).`,
+              status: "MONITORED"
+            }
+          });
+          await prisma.account.update({
+            where: { id: acc.id },
+            data: { watchlistStatus: "monitored" }
+          });
+        }
+
+        const existingAlert = await prisma.alert.findFirst({
+          where: { accountId: acc.id, acknowledged: false }
+        });
+        if (!existingAlert) {
+          await prisma.alert.create({
+            data: {
+              accountId: acc.id,
+              type: "MULE_BEHAVIOUR_DETECTED",
+              severity: res.level,
+              title: `High Risk Account Flagged (${acc.accountRef})`,
+              message: `Account ${acc.accountRef} reached risk score ${res.score}/100 with ${res.signals.length} active behavioural risk signals across multi-hop trails.`,
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error analyzing account", acc.id, err);
+    }
+  }
+
+  return results;
+}
+

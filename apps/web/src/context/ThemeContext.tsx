@@ -20,13 +20,13 @@ function applyTheme(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem("trailtrace-theme");
+    const stored = localStorage.getItem("anvesh-theme");
     return stored === "light" || stored === "dark" ? stored : "dark";
   });
 
   useEffect(() => {
     applyTheme(theme);
-    localStorage.setItem("trailtrace-theme", theme);
+    localStorage.setItem("anvesh-theme", theme);
   }, [theme]);
 
   const value = useMemo(

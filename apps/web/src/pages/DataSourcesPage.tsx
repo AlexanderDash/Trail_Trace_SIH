@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Upload, FileText, CheckCircle, XCircle, Settings, Play, RotateCcw } from "lucide-react";
-import type { BankRecord } from "@trailtrace/shared";
+import type { BankRecord } from "@anvesh/shared";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";

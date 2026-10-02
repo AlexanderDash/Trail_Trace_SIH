@@ -7,7 +7,7 @@ export function StatusBanner() {
       <p>
         <span className="font-semibold">SYNTHETIC DEMO</span>
         {" — "}
-        SIH 26184 prototype. All data is fictional. TrailTrace does not control ATMs, reject withdrawals, or block bank
+        SIH 26184 prototype. All data is fictional. ANVESH does not control ATMs, reject withdrawals, or block bank
         transactions.
       </p>
     </div>

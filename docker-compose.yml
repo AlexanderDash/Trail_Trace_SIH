@@ -1,20 +1,59 @@
-# Optional PostgreSQL for later stages.
-# Foundation currently uses SQLite so the app runs without Docker.
-# Docker is not required to start TrailTrace today.
-
 services:
+  python-engine:
+    build:
+      context: ./apps/python-engine
+      dockerfile: Dockerfile
+    container_name: anvesh-python-engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: anvesh-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - DATABASE_URL=file:./prisma/dev.db
+      - CORS_ORIGIN=*
+      - PYTHON_ENGINE_URL=http://python-engine:8000
+    depends_on:
+      - python-engine
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: anvesh-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - API_PROXY_TARGET=http://api:3001
+    depends_on:
+      - api
+
+
+  # Optional PostgreSQL for production scale
   postgres:
     image: postgres:16-alpine
-    container_name: trailtrace-postgres
+    container_name: anvesh-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: trailtrace
-      POSTGRES_PASSWORD: trailtrace
-      POSTGRES_DB: trailtrace
+      POSTGRES_USER: anvesh
+      POSTGRES_PASSWORD: anvesh
+      POSTGRES_DB: anvesh
     ports:
       - "5432:5432"
     volumes:
-      - trailtrace_pg:/var/lib/postgresql/data
+      - anvesh_pg:/var/lib/postgresql/data
+    profiles:
+      - full-db
 
 volumes:
-  trailtrace_pg:
+  anvesh_pg:

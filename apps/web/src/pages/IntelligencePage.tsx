@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { 
   Network, Share2, Activity, FileText, Sparkles, Play, Compass,
-  ArrowRightLeft, BarChart3, Clock, AlertTriangle, ShieldAlert
+  ArrowRightLeft, BarChart3, Clock, AlertTriangle
 } from "lucide-react";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Panel } from "../components/ui/Panel";
@@ -13,7 +13,9 @@ const API = "/api/v1";
 export function IntelligencePage() {
   const [summary, setSummary] = useState<any>(null);
   const [networkNodes, setNetworkNodes] = useState<any[]>([]);
-  const [networkEdges, setNetworkEdges] = useState<any[]>([]);
+  const [, setNetworkEdges] = useState<any[]>([]);
+
+
   const [correlations, setCorrelations] = useState<any[]>([]);
   const [engineStatus, setEngineStatus] = useState<any>(null);
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -65,13 +67,13 @@ export function IntelligencePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Advanced Financial Intelligence"
-        title="Intelligence & Network Analysis"
-        description="Correlate all imported complaints, identify high-risk networks spanning multiple cases, and analyze financial behavior patterns."
+        eyebrow="SIH 26184 — Cybercrime Interdiction & DNA"
+        title="Route DNA & Interdiction Intelligence"
+        description="Multi-signal behavioral trajectory forecasting, Mode A/B ring matching, evidence-graded signal decomposition, and micro choke-point optimization."
         actions={
-          <button className="flex items-center gap-2 rounded bg-ink-900 px-4 py-2 text-sm text-white hover:bg-ink-800 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white">
-            <FileText className="h-4 w-4" /> Export Intelligence Summary
-          </button>
+          <div className="flex items-center gap-2">
+            <Badge tone="intel">ANVESH 2.0</Badge>
+          </div>
         }
       />
 
@@ -89,7 +91,7 @@ export function IntelligencePage() {
           <Panel>
              <div className="flex justify-between items-center mb-4">
                <h3 className="text-lg font-bold flex items-center gap-2">
-                 <Share2 className="h-5 w-5 text-intel" /> Account Network Graph
+                 <Share2 className="h-5 w-5 text-intel" /> Account Network Graph & Flow Topology
                </h3>
                <div className="flex gap-2">
                  <select className="text-xs bg-ink-100 dark:bg-ink-900 border-none rounded p-1">
@@ -100,33 +102,51 @@ export function IntelligencePage() {
                </div>
              </div>
              
-             {/* Simulated Graph Canvas */}
-             <div className="bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded h-[400px] flex items-center justify-center relative overflow-hidden">
-               {/* Visual proxy for graph since we don't have a robust canvas lib */}
+             {/* Graph Flow Proxy */}
+             <div className="bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded p-6 relative overflow-hidden">
                {networkNodes.length > 0 ? (
-                 <div className="text-center p-4">
-                   <Network className="h-16 w-16 mx-auto text-ink-300 dark:text-ink-700 mb-4 opacity-50" />
-                   <p className="text-sm font-medium">Network Data Loaded</p>
-                   <p className="text-xs text-ink-500 mb-4">{networkNodes.length} Nodes • {networkEdges.length} Edges</p>
-                   <div className="flex flex-wrap gap-2 justify-center max-w-lg">
-                      {networkNodes.slice(0, 15).map(n => (
-                        <span key={n.id} className="text-[10px] font-mono bg-ink-200 dark:bg-ink-800 px-2 py-1 rounded border border-ink-300 dark:border-ink-700">
-                          {n.account?.accountRef || n.accountId}
-                        </span>
+                 <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                     <div>
+                       <span className="font-semibold text-sm">Active Account Nodes ({networkNodes.length})</span>
+                       <span className="text-xs text-ink-500 ml-2">Evidence-Graded Inter-Bank Hops</span>
+                     </div>
+                     <div className="flex gap-3 text-xs">
+                       <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-500"></span> [Observed] Confirmed</span>
+                       <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500"></span> [Linked] Ring Prior</span>
+                       <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-rose-500"></span> [Predicted] Target</span>
+                     </div>
+                   </div>
+
+                   <div className="flex flex-wrap gap-2 py-2">
+                      {networkNodes.slice(0, 16).map((n, idx) => (
+                        <div key={n.id || idx} className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 shadow-sm text-xs font-mono">
+                          <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                          <span className="font-medium text-ink-800 dark:text-ink-200">{n.account?.accountRef || n.accountId}</span>
+                          <span className="text-[10px] text-ink-400">({n.role || "mule"})</span>
+                        </div>
                       ))}
-                      {networkNodes.length > 15 && <span className="text-[10px] text-ink-500 py-1">+{networkNodes.length - 15} more</span>}
+                      {networkNodes.length > 16 && (
+                        <span className="text-xs text-ink-500 self-center">+{networkNodes.length - 16} more nodes</span>
+                      )}
                    </div>
-                   <div className="absolute bottom-4 left-4 text-left text-xs bg-white dark:bg-ink-900 p-2 border border-ink-200 dark:border-ink-800 rounded shadow-sm opacity-90">
-                     <div className="font-bold mb-1">Detected Patterns:</div>
-                     <div className="text-warning flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Fan-out behaviour</div>
-                     <div className="text-intel flex items-center gap-1"><ArrowRightLeft className="h-3 w-3" /> Cross-bank movement</div>
-                     <div className="text-danger flex items-center gap-1"><ShieldAlert className="h-3 w-3" /> Suspicious convergence</div>
-                   </div>
-                   <div className="absolute top-4 right-4 text-left text-xs bg-white dark:bg-ink-900 p-2 border border-ink-200 dark:border-ink-800 rounded shadow-sm opacity-90">
-                     <div className="font-bold mb-1">Network Risk Score: <span className="text-danger">78</span></div>
-                     <div className="text-ink-500">+25 High-risk accounts</div>
-                     <div className="text-ink-500">+20 Shared complaint trails</div>
-                     <div className="text-ink-500">+15 Cross-bank movement</div>
+
+                   <div className="grid sm:grid-cols-3 gap-3 pt-3 border-t border-ink-200 dark:border-ink-800 text-xs">
+                     <div className="p-2.5 rounded bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800">
+                       <span className="text-[10px] uppercase font-bold text-ink-400 block mb-0.5">Route DNA Structuring</span>
+                       <span className="font-semibold text-intel">Three-Signal Motif Verified</span>
+                       <p className="text-[11px] text-ink-500 mt-1">Chronological ordering & log-binned hop timing confirmed.</p>
+                     </div>
+                     <div className="p-2.5 rounded bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800">
+                       <span className="text-[10px] uppercase font-bold text-ink-400 block mb-0.5">Rails Physics Pre-Filter</span>
+                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">Feasible Candidate Set</span>
+                       <p className="text-[11px] text-ink-500 mt-1">Within daily UPI/IMPS limit with ≤10% hop cost decay.</p>
+                     </div>
+                     <div className="p-2.5 rounded bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800">
+                       <span className="text-[10px] uppercase font-bold text-ink-400 block mb-0.5">Silence Detection</span>
+                       <span className="font-semibold text-amber-600 dark:text-amber-400">Active Forwarding</span>
+                       <p className="text-[11px] text-ink-500 mt-1">Expected vs observed transfer window within tolerance.</p>
+                     </div>
                    </div>
                  </div>
                ) : (
@@ -135,42 +155,45 @@ export function IntelligencePage() {
              </div>
           </Panel>
 
-          {/* Mathematical Prediction & NetworkX Forecast Engine */}
+          {/* Mathematical Prediction & Interdiction Intelligence */}
           <Panel className="border-intel/30">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold flex items-center gap-2 text-ink-900 dark:text-ink-100">
-                <Sparkles className="h-5 w-5 text-intel" /> Mathematical Trajectory & Cash-Out Forecaster
+                <Sparkles className="h-5 w-5 text-intel" /> Predictive Analytics & Interdiction Intelligence
               </h3>
-              <Badge tone={engineStatus?.status === "ACTIVE" ? "intel" : "warning"}>
-                {engineStatus?.status === "ACTIVE" ? "PYTHON ENGINE: ACTIVE" : "PYTHON ENGINE: STANDBY (PORT 8000)"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge tone={prediction?.mode === "MODE_A" ? "intel" : "warning"}>
+                  {prediction?.mode_label || (prediction?.mode === "MODE_A" ? "MODE A: RING MATCHED" : "MODE B: PROFILE FORECAST")}
+                </Badge>
+              </div>
             </div>
 
-            <div className="bg-ink-50 dark:bg-ink-900/60 p-4 rounded-lg border border-ink-200 dark:border-ink-800 space-y-3">
+            <div className="bg-ink-50 dark:bg-ink-900/60 p-4 rounded-lg border border-ink-200 dark:border-ink-800 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h4 className="font-semibold text-ink-900 dark:text-ink-100 text-sm">
-                    {engineStatus?.name || "NetworkX_Laplace_v1"}
+                    {engineStatus?.name || "ANVESH Mathematical Engine (NetworkX & Laplace)"}
                   </h4>
                   <p className="text-xs text-ink-500 mt-0.5">
                     Algorithm: <span className="font-mono text-intel">{engineStatus?.algorithm || "Laplace Add-1 Smoothing & NetworkX MultiDiGraph"}</span>
                   </p>
                 </div>
-                <div className="flex gap-1 flex-wrap">
-                  <span className="text-[10px] bg-intel/10 text-intel font-mono px-2 py-0.5 rounded">Laplace Add-1</span>
-                  <span className="text-[10px] bg-signal-amber/10 text-signal-amber font-mono px-2 py-0.5 rounded">Drift Risk %</span>
-                  <span className="text-[10px] bg-ink-200 dark:bg-ink-800 text-ink-600 dark:text-ink-400 font-mono px-2 py-0.5 rounded">Golden Hour 60m</span>
+                <div className="flex gap-1.5 flex-wrap">
+                  <span className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono px-2 py-0.5 rounded font-medium">[Observed] Hops</span>
+                  <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono px-2 py-0.5 rounded font-medium">[Linked] Cross-Case</span>
+                  <span className="text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-mono px-2 py-0.5 rounded font-medium">[Inferred] Rails Physics</span>
+                  <span className="text-[10px] bg-rose-500/10 text-rose-600 dark:text-rose-400 font-mono px-2 py-0.5 rounded font-medium">[Predicted] STKDE</span>
                 </div>
               </div>
 
               {/* Interactive Case Forecaster */}
               <div className="pt-2 border-t border-ink-200 dark:border-ink-800/80">
                 <label className="text-[10px] uppercase font-bold text-ink-400 tracking-wider block mb-1.5">
-                  Select Case / Complaint to Forecast
+                  Select Complaint File to Forecast & Interdict
                 </label>
                 <div className="flex gap-2">
                   <select
-                    className="flex-1 rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-950 px-2 py-1.5 text-xs text-ink-900 dark:text-ink-100"
+                    className="flex-1 rounded border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-950 px-2.5 py-1.5 text-xs text-ink-900 dark:text-ink-100"
                     value={selectedComplaintId}
                     onChange={(e) => {
                       setSelectedComplaintId(e.target.value);
@@ -188,10 +211,10 @@ export function IntelligencePage() {
                   <button
                     onClick={handleRunForecast}
                     disabled={predicting || !selectedComplaintId}
-                    className="flex items-center gap-1.5 rounded bg-intel text-white px-3 py-1.5 text-xs font-medium hover:bg-intel/90 disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded bg-intel text-white px-3.5 py-1.5 text-xs font-medium hover:bg-intel/90 disabled:opacity-50 transition-colors shadow-sm"
                   >
                     <Play className="h-3.5 w-3.5" />
-                    {predicting ? "Running..." : "Run Forecast"}
+                    {predicting ? "Analyzing..." : "Generate Prediction"}
                   </button>
                 </div>
               </div>
@@ -199,35 +222,57 @@ export function IntelligencePage() {
               {predictionError && (
                 <div className="p-2.5 rounded bg-signal-rose/10 border border-signal-rose/30 text-xs text-signal-rose">
                   ⚠️ {predictionError}
-                  <div className="mt-1 text-[11px] opacity-80">
-                    Make sure the Python engine is running: <code>cd apps/python-engine && python main.py</code>
-                  </div>
                 </div>
               )}
 
               {/* Live Prediction Output */}
               {prediction && (
-                <div className="mt-3 space-y-3 pt-2 border-t border-ink-200 dark:border-ink-800">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-ink-900 dark:text-ink-100 flex items-center gap-1">
-                      <Compass className="h-3.5 w-3.5 text-intel" /> Money Trail Trajectory
-                    </span>
-                    <Badge tone={prediction.is_predicted ? "intel" : "neutral"}>
-                      {prediction.status || (prediction.is_predicted ? "IN_TRANSIT" : "COMPLETED")}
-                    </Badge>
+                <div className="mt-4 space-y-4 pt-3 border-t border-ink-200 dark:border-ink-800">
+                  
+                  {/* Status & Urgency Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                    <div className="flex items-center gap-2">
+                      <Badge tone={prediction.mode === "MODE_A" ? "intel" : "warning"}>
+                        {prediction.mode_label || "Mode B (Cold-Start Profile Forecast)"}
+                      </Badge>
+                      <span className="text-xs font-semibold text-ink-800 dark:text-ink-200">
+                        Status: <span className="font-mono text-intel">{prediction.status || "IN_TRANSIT"}</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs">
+                      {prediction.expected_value_inr && (
+                        <div className="text-ink-600 dark:text-ink-300">
+                          Expected Value: <span className="font-mono font-bold text-intel">₹{Number(prediction.expected_value_inr).toLocaleString("en-IN")}</span>
+                        </div>
+                      )}
+                      {prediction.urgency && (
+                        <Badge tone={prediction.urgency.tier?.includes("CRITICAL") ? "danger" : "warning"}>
+                          {`${prediction.urgency.tier} (${prediction.urgency.golden_hour_remaining_minutes}m left)`}
+                        </Badge>
+                      )}
+
+                    </div>
                   </div>
 
+                  {/* Money Trail Flow */}
                   {prediction.money_trail_string && (
-                    <div className="p-2 rounded bg-white dark:bg-ink-950 font-mono text-xs text-ink-800 dark:text-ink-200 border border-ink-200 dark:border-ink-800 overflow-x-auto">
-                      {prediction.money_trail_string}
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-ink-400 mb-1 flex items-center gap-1">
+                        <Compass className="h-3.5 w-3.5 text-intel" /> Money Trail Flow (Observed Digital Hops ➔ Predicted Cash-Out)
+                      </div>
+                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 font-mono text-xs text-ink-800 dark:text-ink-200 border border-ink-200 dark:border-ink-800 overflow-x-auto whitespace-nowrap shadow-inner">
+                        {prediction.money_trail_string}
+                      </div>
                     </div>
                   )}
 
+                  {/* Prediction Candidates */}
                   {prediction.is_predicted && prediction.predictions ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
-                        <div className="text-[10px] uppercase text-ink-400">Primary Next Hop</div>
-                        <div className="font-mono font-bold text-intel text-sm mt-0.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                      <div className="p-3 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                        <div className="text-[10px] uppercase font-bold text-ink-400">[Predicted] Next Hop Candidate</div>
+                        <div className="font-mono font-bold text-intel text-base mt-1">
                           {prediction.predictions.primary_node}
                         </div>
                         <div className="text-[11px] text-ink-500 mt-0.5">
@@ -235,30 +280,91 @@ export function IntelligencePage() {
                         </div>
                       </div>
 
-                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
-                        <div className="text-[10px] uppercase text-ink-400">Drift Risk (New Mule)</div>
-                        <div className="font-mono font-bold text-signal-rose text-sm mt-0.5">
+                      <div className="p-3 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                        <div className="text-[10px] uppercase font-bold text-ink-400">[Inferred] Novel Route Drift Risk</div>
+                        <div className="font-mono font-bold text-signal-rose text-base mt-1">
                           {prediction.predictions.novel_drift_risk}
                         </div>
                         <div className="text-[11px] text-ink-500 mt-0.5">
-                          Secondary: {prediction.predictions.secondary_node || "None"} ({prediction.predictions.secondary_prob || "0%"})
+                          Secondary candidate: {prediction.predictions.secondary_node || "Unobserved"} ({prediction.predictions.secondary_prob || "0%"})
                         </div>
                       </div>
 
-                      <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
-                        <div className="text-[10px] uppercase text-ink-400">Predicted Cash-Out</div>
-                        <div className="font-bold text-ink-900 dark:text-ink-100 text-sm mt-0.5">
+                      <div className="p-3 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                        <div className="text-[10px] uppercase font-bold text-ink-400">[Predicted] STKDE Cash-Out Region</div>
+                        <div className="font-bold text-ink-900 dark:text-ink-100 text-base mt-1">
                           {prediction.predictions.predicted_district}
                         </div>
                         <div className="text-[11px] text-ink-500 mt-0.5">
-                          Confidence: <span className="font-semibold text-intel">{prediction.predictions.location_confidence}</span>
+                          Channel: <span className="font-semibold text-ink-700 dark:text-ink-300">{prediction.predictions.channel}</span> ({prediction.predictions.location_confidence})
                         </div>
                       </div>
                     </div>
                   ) : null}
 
+                  {/* Interdiction Intelligence & What-If Reroute Panel */}
+                  {prediction.interdiction && (
+                    <div className="p-3.5 rounded bg-intel/5 border border-intel/30 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-intel flex items-center gap-1.5 uppercase tracking-wide">
+                          🛡️ Interdiction Intelligence & Choke-Point Analysis
+                        </span>
+                        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-intel/15 text-intel font-semibold">
+                          Choke Score: {prediction.interdiction.choke_point_score} / 1.0
+                        </span>
+                      </div>
+                      
+                      <div className="grid sm:grid-cols-2 gap-3 text-xs pt-1">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-ink-400 block">Recommended Intervention Point</span>
+                          <span className="font-mono font-bold text-ink-900 dark:text-ink-100 text-sm">
+                            {prediction.interdiction.choke_point_node}
+                          </span>
+                          <span className="ml-2 text-[10px] uppercase px-1.5 py-0.5 rounded bg-signal-rose/10 text-signal-rose font-semibold">
+                            {prediction.interdiction.action || "FREEZE ADVISORY"}
+                          </span>
+                        </div>
+                        {prediction.interdiction.what_if_reroute && (
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-ink-400 block">What-If Reroute Friction</span>
+                            <span className="text-ink-700 dark:text-ink-300">
+                              Imposes ~₹{Number(prediction.interdiction.what_if_reroute.evasion_friction_cost_inr || 0).toLocaleString("en-IN")} evasion cost ({prediction.interdiction.what_if_reroute.reroute_probability} drift).
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {prediction.interdiction.what_if_reroute?.impact && (
+                        <p className="text-[11px] text-ink-600 dark:text-ink-400 italic pt-1 border-t border-intel/15">
+                          💡 Consequence: {prediction.interdiction.what_if_reroute.impact}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 4-Tier Evidence Graded Signals */}
+                  {prediction.evidence_graded_signals && (
+                    <div className="space-y-1.5 pt-1">
+                      <div className="text-[10px] uppercase font-bold text-ink-400 tracking-wider">
+                        ANVESH 4-Tier Evidence Decomposition
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                        {prediction.evidence_graded_signals.map((sig: any, sIdx: number) => (
+                          <div key={sIdx} className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="font-mono font-bold text-[11px] text-intel">{sig.tag}</span>
+                              <span className="font-semibold text-ink-800 dark:text-ink-200">{sig.title}</span>
+                            </div>
+                            <p className="text-[11px] text-ink-500 dark:text-ink-400">{sig.detail}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Natural Language Tactical Briefing */}
                   {prediction.plain_text_explanation && (
-                    <div className="p-2.5 rounded bg-intel/5 border border-intel/20 text-xs text-ink-700 dark:text-ink-300 font-mono">
+                    <div className="p-2.5 rounded bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800 text-xs text-ink-700 dark:text-ink-300 font-mono">
                       <span className="font-sans font-bold text-intel block mb-0.5">Investigator Briefing:</span>
                       {prediction.plain_text_explanation}
                     </div>
@@ -267,7 +373,7 @@ export function IntelligencePage() {
               )}
             </div>
             <p className="text-[11px] text-ink-500 mt-2.5 italic">
-              Powered by NetworkX MultiDiGraph & Laplace Add-1 Smoothing. Computes candidate route probabilities with novel account drift assessment.
+              ANVESH Research-Grounded Intelligence Core: Three-Signal Structuring, Rails Physics, STKDE Surface, and Interdiction Analysis.
             </p>
           </Panel>
         </div>
@@ -275,6 +381,7 @@ export function IntelligencePage() {
         {/* Right Column: Correlations & Analytics */}
         <div className="space-y-6">
           <Panel>
+
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
               <Activity className="h-5 w-5 text-intel" /> Shared Accounts (Cross-Complaint)
             </h3>

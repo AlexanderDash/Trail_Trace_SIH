@@ -1,5 +1,5 @@
 {
-  "name": "@trailtrace/web",
+  "name": "@anvesh/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@trailtrace/shared": "*",
+    "@anvesh/shared": "*",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",

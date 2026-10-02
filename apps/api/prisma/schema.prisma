@@ -58,6 +58,10 @@ model Account {
   riskProfile          RiskProfile?
   riskSignals          RiskSignal[]
   riskHistory          RiskHistory[]
+
+  @@index([riskScore])
+  @@index([riskStatus])
+  @@index([watchlistStatus])
 }
 
 model ModelVersion {
@@ -102,6 +106,10 @@ model Transaction {
   evidence          Evidence[]
 
   @@unique([bankId, sourceTransactionId])
+  @@index([senderAccountId])
+  @@index([receiverAccountId])
+  @@index([timestamp])
+  @@index([transactionMode])
 }
 
 model ComplaintUpload {

@@ -15,8 +15,8 @@ export async function generateInvestigationReportPdf(investigationId: string): P
       doc.on('end', () => resolve(Buffer.concat(buffers)));
 
       // Header
-      doc.fontSize(20).text('TrailTrace', { align: 'center' });
-      doc.fontSize(14).text('Financial Cybercrime Investigation Report', { align: 'center' });
+      doc.fontSize(20).text('ANVESH — Predictive Interdiction Framework (SIH 26184)', { align: 'center' });
+      doc.fontSize(14).text('Forensic Cybercrime Intelligence & Interdiction Report', { align: 'center' });
       doc.moveDown();
       doc.fontSize(12).text(`Case: ${inv.caseNumber}`, { align: 'center' });
       doc.text(`Generated: ${new Date().toLocaleString()}`, { align: 'center' });
@@ -25,11 +25,12 @@ export async function generateInvestigationReportPdf(investigationId: string): P
       // Disclaimer
       doc.fontSize(9).fillColor('#666666')
         .text(
-          "DISCLAIMER: This report contains analytical intelligence generated from available transaction, complaint, behavioural and geospatial data. Predictive outputs represent analytical likelihoods and should not be interpreted as certainty or as an automated determination of criminal activity.",
+          "DISCLAIMER (ANVESH Research Protocol): This forensic report contains analytical intelligence, multi-hop trail reconstruction, and probabilistic interdiction recommendations generated under SIH 26184 research guidelines. Predictive cash-out locations represent statistical likelihood surfaces.",
           { align: 'justify' }
         );
       doc.moveDown(2);
       doc.fillColor('black');
+
 
       // Case Summary
       doc.fontSize(14).text('1. Case Overview', { underline: true });

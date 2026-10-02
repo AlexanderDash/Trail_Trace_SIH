@@ -1,4 +1,4 @@
-# TrailTrace Architecture
+# ANVESH Architecture
 
 This document describes the architectural flow of data from ingestion to advanced intelligence correlation.
 

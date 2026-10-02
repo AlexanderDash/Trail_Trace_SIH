@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Router } from "express";
-import { APP_NAME } from "@trailtrace/shared";
+import { APP_NAME } from "@anvesh/shared";
 import { config } from "../../config.js";
 import { MODULE_CATALOG } from "../../lib/modules.js";
 import { checkDatabase, prisma } from "../../lib/prisma.js";

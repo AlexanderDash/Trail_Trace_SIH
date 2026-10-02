@@ -1,4 +1,4 @@
-import type { ModuleStatus } from "@trailtrace/shared";
+import type { ModuleStatus } from "@anvesh/shared";
 
 export const MODULE_CATALOG: ModuleStatus[] = [
   {
@@ -9,7 +9,7 @@ export const MODULE_CATALOG: ModuleStatus[] = [
   {
     key: "transactions",
     implemented: true,
-    summary: "Normalized cross-bank ledger with preserved source-bank metadata.",
+    summary: "Normalized cross-bank ledger with search, filtering, and source metadata.",
   },
   {
     key: "complaints",
@@ -18,37 +18,42 @@ export const MODULE_CATALOG: ModuleStatus[] = [
   },
   {
     key: "investigation",
-    implemented: false,
-    summary: "Case files, evidence linkage, and investigator workflow.",
+    implemented: true,
+    summary: "Case workspace, activity timeline, evidence linkage, and findings recorder.",
   },
   {
     key: "trails",
     implemented: true,
-    summary: "Cross-bank money-trail construction via BFS from a matched origin transaction.",
+    summary: "Cross-bank money-trail construction via BFS and mathematical trajectory prediction.",
   },
   {
     key: "risk",
-    implemented: false,
-    summary: "Behavioural mule-risk scoring. Appearance in a trail is not sufficient.",
+    implemented: true,
+    summary: "Behavioural mule-risk scoring with rapid-forwarding and fan-out detection.",
   },
   {
     key: "watchlist",
-    implemented: false,
-    summary: "Monitoring of accounts that cross a risk threshold.",
+    implemented: true,
+    summary: "Continuous monitoring and triage of flagged high-risk accounts.",
   },
   {
     key: "alerts",
-    implemented: false,
-    summary: "Activity alerts for watched accounts and trail updates.",
+    implemented: true,
+    summary: "Real-time behavioural and trail risk alert dispatching.",
   },
   {
     key: "geo",
-    implemented: false,
-    summary: "Location events, clusters, and later hotspot prediction. No ATM control.",
+    implemented: true,
+    summary: "Geospatial visualization, location events, and DBSCAN hotspot clustering.",
+  },
+  {
+    key: "ml",
+    implemented: true,
+    summary: "Hybrid machine learning and heuristic withdrawal hotspot predictive analytics.",
   },
   {
     key: "reports",
-    implemented: false,
-    summary: "Investigator-facing summaries and exportable intelligence notes.",
+    implemented: true,
+    summary: "One-click PDF intelligence dossier generation and investigative export digests.",
   },
 ];

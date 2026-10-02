@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SystemInfo } from "@trailtrace/shared";
+import type { SystemInfo } from "@anvesh/shared";
 import { api } from "../lib/api";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";

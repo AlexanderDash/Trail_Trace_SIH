@@ -5,7 +5,7 @@ import { prisma } from "./lib/prisma.js";
 const app = createApp();
 
 const server = app.listen(config.port, () => {
-  console.log(`TrailTrace API listening on http://localhost:${config.port}`);
+  console.log(`ANVESH API listening on http://localhost:${config.port}`);
   console.log("Synthetic demo only. No ATM control or transaction blocking.");
 });
 
