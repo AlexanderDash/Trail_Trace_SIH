@@ -32,21 +32,28 @@ export async function getDashboardSummary(databaseConnected: boolean): Promise<D
           where: { riskStatus: { in: ["high", "critical"] } },
         }),
         prisma.alert.count({ where: { acknowledged: false } }),
-        analyzeGeospatialHotspots(),
+        analyzeGeospatialHotspots().catch((e) => {
+          console.warn("[Dashboard] Geospatial analysis failed (non-fatal):", e?.message ?? e);
+          return [] as any[];
+        }),
         prisma.investigation.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } })
       ])
     : [0, 0, 0, 0, 0, 0, 0, [], 0];
 
   // If there are transactions/trails but accounts haven't been evaluated yet, run auto-analysis
   if (databaseConnected && trackedTrails > 0 && (highRiskAccounts === 0 || watchedAccounts === 0 || activeAlerts === 0)) {
-    await analyzeAllAccounts();
-    [watchedAccounts, highRiskAccounts, activeAlerts] = await Promise.all([
-      prisma.watchlistAccount.count({ where: { status: { not: "CLEARED" } } }),
-      prisma.account.count({
-        where: { riskStatus: { in: ["high", "critical"] } },
-      }),
-      prisma.alert.count({ where: { acknowledged: false } }),
-    ]);
+    try {
+      await analyzeAllAccounts();
+      [watchedAccounts, highRiskAccounts, activeAlerts] = await Promise.all([
+        prisma.watchlistAccount.count({ where: { status: { not: "CLEARED" } } }),
+        prisma.account.count({
+          where: { riskStatus: { in: ["high", "critical"] } },
+        }),
+        prisma.alert.count({ where: { acknowledged: false } }),
+      ]);
+    } catch (e) {
+      console.warn("[Dashboard] Auto-analysis failed (non-fatal):", (e as any)?.message ?? e);
+    }
   }
 
 

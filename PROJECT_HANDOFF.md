@@ -41,7 +41,7 @@
 ---
 
 ## 5. Completed UI & Backend Adaptations
-- **Branding:** Rebranded to `ANVESH (SIH 26184 | TrailTrace 2.0)` across `index.html`, `nav.ts`, and headers.
+- **Branding:** Rebranded to `ANVESH (SIH 26184)` across `index.html`, `nav.ts`, and headers.
 - **Backend Response Enrichment:** `next_hop.py`, `main.py`, and `trails/service.ts` now return:
   - `mode: "MODE_A" | "MODE_B"` and `mode_label`.
   - `interdiction`: contains `choke_point_node`, `choke_point_score`, action recommendation, and `what_if_reroute` (evasion friction penalty).
@@ -62,7 +62,7 @@
   - Re-skinned to **STKDE Risk Surface & Predicted Channel Map** with Mode A/B base-rate indicators.
 - **Investigation Workspace & Reports (`InvestigationWorkspacePage.tsx`, `ReportsPage.tsx`, `report.ts`):**
   - Upgraded findings taxonomy to 4 tiers (`[Observed]`, `[Linked]`, `[Inferred]`, `[Predicted]`, `Choke-Point Freeze Advisory`).
-  - Updated PDF generation service (`apps/api/src/modules/investigations/report.ts`) to issue official **ANVESH Forensic Dossiers** (`ANVESH | TrailTrace 2.0 (SIH 26184)`) with research disclaimers.
+  - Updated PDF generation service (`apps/api/src/modules/investigations/report.ts`) to issue official **ANVESH Forensic Dossiers** (`ANVESH (SIH 26184)`) with research disclaimers.
 
 ---
 
