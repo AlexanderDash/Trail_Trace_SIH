@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import morgan from "morgan";
@@ -31,7 +32,23 @@ export function createApp() {
   app.use(express.json({ limit: "2mb" }));
   app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
 
-  app.get("/", (_req, res) => {
+  // Detect built Vite web client in both container and monorepo environments
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    path.resolve(process.cwd(), "apps/web/dist"),
+    path.resolve(process.cwd(), "../web/dist"),
+    path.resolve(currentDir, "../../web/dist"),
+    path.resolve(currentDir, "../../../apps/web/dist"),
+    "/app/apps/web/dist",
+  ];
+  const webDistPath = candidates.find((c) => fs.existsSync(c));
+
+  if (webDistPath) {
+    console.log(`[Static] Serving web client from: ${webDistPath}`);
+    app.use(express.static(webDistPath));
+  }
+
+  app.get("/api", (_req, res) => {
     res.json({
       name: "ANVESH API",
       synthetic: true,
@@ -58,13 +75,19 @@ export function createApp() {
   app.use("/api/v1/risk", riskRouter);
   app.use("/api/v1/reports", reportsRouter);
 
-  // In production, serve the built Vite web client directly
-  const webDistPath = path.resolve(process.cwd(), "apps/web/dist");
-  if (fs.existsSync(webDistPath)) {
-    app.use(express.static(webDistPath));
+  // SPA fallback for frontend client routing
+  if (webDistPath) {
     app.get("*", (req, res, next) => {
       if (req.path.startsWith("/api/")) return next();
       res.sendFile(path.join(webDistPath, "index.html"));
+    });
+  } else {
+    app.get("/", (_req, res) => {
+      res.json({
+        name: "ANVESH API",
+        synthetic: true,
+        docs: "/api/v1/health",
+      });
     });
   }
 
