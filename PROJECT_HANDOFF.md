@@ -34,7 +34,7 @@
    - `apps/api/src/modules/trails/service.ts`: `createTrail()` runs BFS hop-by-hop traversal.
    - `predictMoneyTrail()` posts to `http://localhost:8000/api/predict` (or fallback heuristic if offline) to determine the active in-transit path and probability of candidate next hops.
 3. **Database Pre-populated for Demos:**
-   - SQLite `dev.db` contains 50 transactions, 63 accounts, 10 complaints, 10 trails, 2 active investigation dossiers, and scored risky accounts.
+   - SQLite `dev.db` contains 70 transactions, 94 accounts, 10 complaints, 10 trails, 2 active investigation dossiers, and scored risky accounts.
    - Sample upload files exist in `sample_data/` (`bank_transactions.csv` and `cybercrime_complaints.csv`).
    - `npm run db:seed` automatically re-seeds and parses both CSVs, matches trails, and runs risk scoring.
 
